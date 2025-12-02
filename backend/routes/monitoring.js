@@ -96,4 +96,19 @@ router.post('/error', (req, res) => {
   }
 });
 
+/**
+ * GET /api/monitoring/env-check
+ * Check if environment variables are set (for debugging)
+ */
+router.get('/env-check', (req, res) => {
+  res.json({
+    hasMongoUri: !!process.env.MONGODB_URI,
+    mongoUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
+    mongoUriPrefix: process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 20) + '...' : 'NOT SET',
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    nodeEnv: process.env.NODE_ENV,
+    hasFrontendUrl: !!process.env.FRONTEND_URL
+  });
+});
+
 module.exports = router;
