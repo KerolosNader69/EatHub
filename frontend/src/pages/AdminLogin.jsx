@@ -10,7 +10,7 @@ const AdminLogin = () => {
   const { login, setLoading, setError } = useAuth();
   
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   
@@ -42,8 +42,10 @@ const AdminLogin = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
     }
     
     if (!formData.password) {
@@ -67,7 +69,7 @@ const AdminLogin = () => {
     
     try {
       const response = await adminService.login({
-        username: formData.username,
+        email: formData.email,
         password: formData.password
       });
       
@@ -78,7 +80,7 @@ const AdminLogin = () => {
       navigate('/admin/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
-      setLoginError(error.message || 'Invalid username or password. Please try again.');
+      setLoginError(error.message || 'Invalid email or password. Please try again.');
       setError(error.message);
     } finally {
       setIsSubmitting(false);
@@ -107,18 +109,19 @@ const AdminLogin = () => {
           )}
           
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              className={errors.username ? 'error' : ''}
+              className={errors.email ? 'error' : ''}
               disabled={isSubmitting}
-              autoComplete="username"
+              autoComplete="email"
+              placeholder="admin@eathub.com"
             />
-            <InlineError message={errors.username} />
+            <InlineError message={errors.email} />
           </div>
           
           <div className="form-group">
