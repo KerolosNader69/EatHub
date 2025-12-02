@@ -1,4 +1,4 @@
-const MenuItem = require('../models/MenuItem');
+const supabase = require('../config/supabase');
 
 /**
  * @desc    Get all available menu items
@@ -7,14 +7,19 @@ const MenuItem = require('../models/MenuItem');
  */
 const getMenuItems = async (req, res) => {
   try {
-    // Fetch only available menu items
-    const menuItems = await MenuItem.find({ available: true })
-      .select('-__v')
-      .sort({ category: 1, name: 1 });
+    // Fetch only available menu items from Supabase
+    const { data: menuItems, error } = await supabase
+      .from('menu_items')
+      .select('*')
+      .eq('available', true)
+      .order('category', { ascending: true })
+      .order('name', { ascending: true });
+
+    if (error) throw error;
 
     res.status(200).json({
       success: true,
-      data: menuItems
+      data: menuItems || []
     });
   } catch (error) {
     console.error('Error fetching menu items:', error);
@@ -37,20 +42,14 @@ const getMenuItemById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate MongoDB ObjectId format
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Invalid menu item ID format',
-          code: 'INVALID_ID'
-        }
-      });
-    }
+    // Fetch menu item from Supabase by UUID
+    const { data: menuItem, error } = await supabase
+      .from('menu_items')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    const menuItem = await MenuItem.findById(id).select('-__v');
-
-    if (!menuItem) {
+    if (error || !menuItem) {
       return res.status(404).json({
         success: false,
         error: {
@@ -100,10 +99,10 @@ const createMenuItem = async (req, res) => {
     const menuItemData = {
       name,
       description,
-      price,
+      price: parseFloat(price),
       category,
       ingredients: ingredients ? (Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients)) : [],
-      portionSize: portionSize || '',
+      portion_size: portionSize || '',
       available: available !== undefined ? available : true
     };
 
@@ -112,8 +111,14 @@ const createMenuItem = async (req, res) => {
       menuItemData.image = `/uploads/${req.file.filename}`;
     }
 
-    // Create menu item
-    const menuItem = await MenuItem.create(menuItemData);
+    // Create menu item in Supabase
+    const { data: menuItem, error } = await supabase
+      .from('menu_items')
+      .insert([menuItemData])
+      .select()
+      .single();
+
+    if (error) throw error;
 
     res.status(201).json({
       success: true,
@@ -121,18 +126,6 @@ const createMenuItem = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating menu item:', error);
-
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: messages.join(', '),
-          code: 'VALIDATION_ERROR'
-        }
-      });
-    }
 
     res.status(500).json({
       success: false,
@@ -152,22 +145,34 @@ const createMenuItem = async (req, res) => {
 const updateMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
+    const { name, description, price, category, ingredients, portionSize, available } = req.body;
 
-    // Validate MongoDB ObjectId format
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Invalid menu item ID format',
-          code: 'INVALID_ID'
-        }
-      });
+    // Prepare update data
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = parseFloat(price);
+    if (category !== undefined) updateData.category = category;
+    if (ingredients !== undefined) {
+      updateData.ingredients = Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients);
+    }
+    if (portionSize !== undefined) updateData.portion_size = portionSize;
+    if (available !== undefined) updateData.available = available;
+
+    // Update image if new file was uploaded
+    if (req.file) {
+      updateData.image = `/uploads/${req.file.filename}`;
     }
 
-    // Find existing menu item
-    const menuItem = await MenuItem.findById(id);
+    // Update menu item in Supabase
+    const { data: menuItem, error } = await supabase
+      .from('menu_items')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!menuItem) {
+    if (error || !menuItem) {
       return res.status(404).json({
         success: false,
         error: {
@@ -177,45 +182,12 @@ const updateMenuItem = async (req, res) => {
       });
     }
 
-    // Update fields
-    const { name, description, price, category, ingredients, portionSize, available } = req.body;
-
-    if (name !== undefined) menuItem.name = name;
-    if (description !== undefined) menuItem.description = description;
-    if (price !== undefined) menuItem.price = price;
-    if (category !== undefined) menuItem.category = category;
-    if (ingredients !== undefined) {
-      menuItem.ingredients = Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients);
-    }
-    if (portionSize !== undefined) menuItem.portionSize = portionSize;
-    if (available !== undefined) menuItem.available = available;
-
-    // Update image if new file was uploaded
-    if (req.file) {
-      menuItem.image = `/uploads/${req.file.filename}`;
-    }
-
-    // Save updated menu item
-    await menuItem.save();
-
     res.status(200).json({
       success: true,
       data: menuItem
     });
   } catch (error) {
     console.error('Error updating menu item:', error);
-
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: messages.join(', '),
-          code: 'VALIDATION_ERROR'
-        }
-      });
-    }
 
     res.status(500).json({
       success: false,
@@ -236,20 +208,13 @@ const deleteMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate MongoDB ObjectId format
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Invalid menu item ID format',
-          code: 'INVALID_ID'
-        }
-      });
-    }
+    // Delete menu item from Supabase
+    const { error } = await supabase
+      .from('menu_items')
+      .delete()
+      .eq('id', id);
 
-    const menuItem = await MenuItem.findById(id);
-
-    if (!menuItem) {
+    if (error) {
       return res.status(404).json({
         success: false,
         error: {
@@ -258,8 +223,6 @@ const deleteMenuItem = async (req, res) => {
         }
       });
     }
-
-    await MenuItem.findByIdAndDelete(id);
 
     res.status(200).json({
       success: true,

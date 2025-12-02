@@ -1,5 +1,4 @@
-const Order = require('../models/Order');
-const MenuItem = require('../models/MenuItem');
+const supabase = require('../config/supabase');
 
 /**
  * Generate unique order number
@@ -68,9 +67,14 @@ const createOrder = async (req, res) => {
         });
       }
 
-      const menuItem = await MenuItem.findById(item.itemId);
+      // Fetch menu item from Supabase
+      const { data: menuItem, error } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('id', item.itemId)
+        .single();
 
-      if (!menuItem) {
+      if (error || !menuItem) {
         return res.status(404).json({
           success: false,
           error: {
@@ -91,42 +95,60 @@ const createOrder = async (req, res) => {
       }
 
       orderItems.push({
-        menuItem: menuItem._id,
+        menu_item_id: menuItem.id,
         name: menuItem.name,
         price: menuItem.price,
         quantity: item.quantity
       });
 
-      totalAmount += menuItem.price * item.quantity;
+      totalAmount += parseFloat(menuItem.price) * item.quantity;
     }
 
     // Generate unique order number
     const orderNumber = generateOrderNumber();
 
     // Set estimated delivery time (current time + 45 minutes)
-    const estimatedDelivery = new Date(Date.now() + 45 * 60 * 1000);
+    const estimatedDelivery = new Date(Date.now() + 45 * 60 * 1000).toISOString();
 
-    // Create order
-    const order = await Order.create({
-      orderNumber,
-      items: orderItems,
-      customerInfo: {
-        name: customerInfo.name.trim(),
-        phone: customerInfo.phone.trim(),
-        address: customerInfo.address.trim()
-      },
-      specialInstructions: specialInstructions || '',
-      totalAmount,
-      estimatedDelivery,
-      status: 'received'
-    });
+    // Create order in Supabase
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert([{
+        order_number: orderNumber,
+        customer_name: customerInfo.name.trim(),
+        customer_phone: customerInfo.phone.trim(),
+        customer_address: customerInfo.address.trim(),
+        special_instructions: specialInstructions || '',
+        total_amount: totalAmount,
+        estimated_delivery: estimatedDelivery,
+        status: 'received'
+      }])
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    // Insert order items
+    const itemsToInsert = orderItems.map(item => ({
+      ...item,
+      order_id: order.id
+    }));
+
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(itemsToInsert);
+
+    if (itemsError) throw itemsError;
 
     res.status(201).json({
       success: true,
       data: {
-        orderNumber: order.orderNumber,
-        estimatedDelivery: order.estimatedDelivery,
-        order
+        orderNumber: order.order_number,
+        estimatedDelivery: order.estimated_delivery,
+        order: {
+          ...order,
+          items: orderItems
+        }
       }
     });
   } catch (error) {
@@ -150,9 +172,17 @@ const getOrderByNumber = async (req, res) => {
   try {
     const { orderNumber } = req.params;
 
-    const order = await Order.findOne({ orderNumber }).populate('items.menuItem');
+    // Fetch order from Supabase
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (*)
+      `)
+      .eq('order_number', orderNumber)
+      .single();
 
-    if (!order) {
+    if (error || !order) {
       return res.status(404).json({
         success: false,
         error: {
@@ -178,11 +208,6 @@ const getOrderByNumber = async (req, res) => {
   }
 };
 
-module.exports = {
-  createOrder,
-  getOrderByNumber
-};
-
 /**
  * @route   GET /api/orders
  * @desc    Get all orders (admin only)
@@ -192,10 +217,17 @@ const getAllOrders = async (req, res) => {
   try {
     const { status } = req.query;
 
-    // Build query filter
-    const filter = {};
+    // Build query
+    let query = supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (*)
+      `)
+      .order('created_at', { ascending: false });
+
+    // Filter by status if provided
     if (status) {
-      // Validate status value
       const validStatuses = ['received', 'preparing', 'out_for_delivery', 'delivered'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
@@ -206,17 +238,16 @@ const getAllOrders = async (req, res) => {
           }
         });
       }
-      filter.status = status;
+      query = query.eq('status', status);
     }
 
-    // Fetch orders sorted by createdAt descending (newest first)
-    const orders = await Order.find(filter)
-      .populate('items.menuItem')
-      .sort({ createdAt: -1 });
+    const { data: orders, error } = await query;
+
+    if (error) throw error;
 
     res.status(200).json({
       success: true,
-      data: orders
+      data: orders || []
     });
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -252,14 +283,18 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Find and update order
-    const order = await Order.findOneAndUpdate(
-      { orderNumber },
-      { status },
-      { new: true, runValidators: true }
-    ).populate('items.menuItem');
+    // Update order status in Supabase
+    const { data: order, error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('order_number', orderNumber)
+      .select(`
+        *,
+        order_items (*)
+      `)
+      .single();
 
-    if (!order) {
+    if (error || !order) {
       return res.status(404).json({
         success: false,
         error: {

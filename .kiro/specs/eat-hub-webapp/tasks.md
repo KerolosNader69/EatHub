@@ -466,7 +466,9 @@
     - Test API endpoints with test database
     - _Requirements: All requirements_
   
-  - [ ] 16.3 Perform accessibility testing
+  - [x] 16.3 Perform accessibility testing
+
+
 
 
 

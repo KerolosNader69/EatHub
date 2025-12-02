@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { CartProvider } from '../context/CartContext';
 import { AuthProvider } from '../context/AuthContext';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 // Components to test
 import IntroSequence from '../components/IntroSequence';
@@ -35,13 +36,15 @@ vi.mock('../services/menuService', () => ({
 // Helper to render with providers
 const renderWithProviders = (component) => {
   return render(
-    <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          {component}
-        </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <CartProvider>
+            {component}
+          </CartProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 
