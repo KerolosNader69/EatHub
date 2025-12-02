@@ -47,12 +47,15 @@ app.use(requestLogger);
 // Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
 
+// Database connection middleware for serverless
+const ensureDbConnection = require('./middleware/ensureDbConnection');
+
 // Routes
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Eat Hub API' });
 });
 
-// Monitoring routes
+// Monitoring routes (no DB required for some endpoints)
 const monitoringRoutes = require('./routes/monitoring');
 app.use('/api/monitoring', monitoringRoutes);
 
@@ -61,17 +64,17 @@ app.get('/api/health', (req, res) => {
   res.redirect('/api/monitoring/health');
 });
 
-// Auth routes
+// Auth routes (requires DB)
 const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', ensureDbConnection, authRoutes);
 
-// Menu routes
+// Menu routes (requires DB)
 const menuRoutes = require('./routes/menu');
-app.use('/api/menu', menuRoutes);
+app.use('/api/menu', ensureDbConnection, menuRoutes);
 
-// Order routes
+// Order routes (requires DB)
 const orderRoutes = require('./routes/orders');
-app.use('/api/orders', orderRoutes);
+app.use('/api/orders', ensureDbConnection, orderRoutes);
 
 // Track requests for monitoring
 app.use((req, res, next) => {
