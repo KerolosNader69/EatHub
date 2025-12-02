@@ -1,69 +1,51 @@
 const express = require('express');
 const router = express.Router();
-const Admin = require('../models/Admin');
-const { generateToken } = require('../utils/jwt');
-const { authenticateAdmin } = require('../middleware/auth');
+const supabase = require('../config/supabase');
 
 /**
  * @route   POST /api/auth/login
- * @desc    Admin login
+ * @desc    Admin login with Supabase
  * @access  Public
  */
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     // Validate input
-    if (!username || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
         error: {
-          message: 'Please provide username and password',
+          message: 'Please provide email and password',
           code: 'MISSING_CREDENTIALS'
         }
       });
     }
 
-    // Find admin by username
-    const admin = await Admin.findOne({ username: username.toLowerCase() });
-
-    if (!admin) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          message: 'Invalid credentials',
-          code: 'INVALID_CREDENTIALS'
-        }
-      });
-    }
-
-    // Check password
-    const isPasswordValid = await admin.comparePassword(password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          message: 'Invalid credentials',
-          code: 'INVALID_CREDENTIALS'
-        }
-      });
-    }
-
-    // Generate token
-    const token = generateToken({
-      id: admin._id,
-      username: admin.username
+    // Sign in with Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
     });
 
-    // Return success response
+    if (error) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          message: 'Invalid credentials',
+          code: 'INVALID_CREDENTIALS'
+        }
+      });
+    }
+
+    // Return success response with Supabase session
     res.json({
       success: true,
-      token,
+      token: data.session.access_token,
       admin: {
-        id: admin._id,
-        username: admin.username,
-        email: admin.email
+        id: data.user.id,
+        email: data.user.email,
+        username: data.user.user_metadata?.username || data.user.email.split('@')[0]
       }
     });
   } catch (error) {
@@ -80,17 +62,42 @@ router.post('/login', async (req, res) => {
 
 /**
  * @route   POST /api/auth/verify
- * @desc    Verify JWT token
+ * @desc    Verify Supabase JWT token
  * @access  Private
  */
-router.post('/verify', authenticateAdmin, async (req, res) => {
+router.post('/verify', async (req, res) => {
   try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          message: 'No token provided',
+          code: 'NO_TOKEN'
+        }
+      });
+    }
+
+    // Verify token with Supabase
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data.user) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          message: 'Invalid token',
+          code: 'INVALID_TOKEN'
+        }
+      });
+    }
+
     res.json({
       success: true,
       admin: {
-        id: req.admin._id,
-        username: req.admin.username,
-        email: req.admin.email
+        id: data.user.id,
+        email: data.user.email,
+        username: data.user.user_metadata?.username || data.user.email.split('@')[0]
       }
     });
   } catch (error) {
@@ -100,6 +107,68 @@ router.post('/verify', authenticateAdmin, async (req, res) => {
       error: {
         message: 'Token verification failed',
         code: 'VERIFICATION_ERROR'
+      }
+    });
+  }
+});
+
+/**
+ * @route   POST /api/auth/signup
+ * @desc    Admin signup with Supabase
+ * @access  Public (can be restricted later)
+ */
+router.post('/signup', async (req, res) => {
+  try {
+    const { email, password, username } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Please provide email and password',
+          code: 'MISSING_CREDENTIALS'
+        }
+      });
+    }
+
+    // Sign up with Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: username || email.split('@')[0]
+        }
+      }
+    });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: error.message,
+          code: 'SIGNUP_ERROR'
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Admin account created successfully',
+      admin: {
+        id: data.user.id,
+        email: data.user.email,
+        username: data.user.user_metadata?.username
+      }
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Signup failed',
+        code: 'SIGNUP_ERROR'
       }
     });
   }

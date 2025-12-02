@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
 const logger = require('./utils/logger');
 const monitor = require('./utils/monitoring');
 const requestLogger = require('./middleware/requestLogger');
@@ -12,18 +11,13 @@ const errorLogger = require('./middleware/errorLogger');
 dotenv.config();
 
 // Log application startup
-logger.info('Starting Eat Hub API server', {
+logger.info('Starting Eat Hub API server with Supabase', {
   environment: process.env.NODE_ENV || 'development',
   nodeVersion: process.version
 });
 
 // Initialize Express app
 const app = express();
-
-// Connect to MongoDB (async, will handle errors in routes)
-connectDB().catch(err => {
-  logger.error('Failed to connect to MongoDB', { error: err.message });
-});
 
 // Middleware
 // CORS configuration
@@ -48,14 +42,12 @@ app.use(requestLogger);
 app.use('/uploads', express.static('uploads'));
 
 // Database connection middleware for serverless
-const ensureDbConnection = require('./middleware/ensureDbConnection');
-
 // Routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to Eat Hub API' });
+  res.json({ message: 'Welcome to Eat Hub API with Supabase' });
 });
 
-// Monitoring routes (no DB required for some endpoints)
+// Monitoring routes
 const monitoringRoutes = require('./routes/monitoring');
 app.use('/api/monitoring', monitoringRoutes);
 
@@ -64,17 +56,17 @@ app.get('/api/health', (req, res) => {
   res.redirect('/api/monitoring/health');
 });
 
-// Auth routes (requires DB)
+// Auth routes (Supabase authentication)
 const authRoutes = require('./routes/auth');
-app.use('/api/auth', ensureDbConnection, authRoutes);
+app.use('/api/auth', authRoutes);
 
-// Menu routes (requires DB)
+// Menu routes (will use Supabase)
 const menuRoutes = require('./routes/menu');
-app.use('/api/menu', ensureDbConnection, menuRoutes);
+app.use('/api/menu', menuRoutes);
 
-// Order routes (requires DB)
+// Order routes (will use Supabase)
 const orderRoutes = require('./routes/orders');
-app.use('/api/orders', ensureDbConnection, orderRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Track requests for monitoring
 app.use((req, res, next) => {
