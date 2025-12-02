@@ -1,6 +1,4 @@
 const winston = require('winston');
-const DailyRotateFile = require('winston-daily-rotate-file');
-const path = require('path');
 
 // Define log format
 const logFormat = winston.format.combine(
@@ -23,53 +21,12 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-// Create logs directory if it doesn't exist
-const logsDir = path.join(__dirname, '../logs');
-
-// Daily rotate file transport for errors
-const errorFileTransport = new DailyRotateFile({
-  filename: path.join(logsDir, 'error-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  level: 'error',
-  maxSize: '20m',
-  maxFiles: '14d',
-  format: logFormat
-});
-
-// Daily rotate file transport for all logs
-const combinedFileTransport = new DailyRotateFile({
-  filename: path.join(logsDir, 'combined-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  maxSize: '20m',
-  maxFiles: '14d',
-  format: logFormat
-});
-
-// Create logger instance
+// Create logger instance with console-only transports for serverless
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: logFormat,
   defaultMeta: { service: 'eat-hub-api' },
-  transports: [
-    errorFileTransport,
-    combinedFileTransport
-  ],
-  exceptionHandlers: [
-    new DailyRotateFile({
-      filename: path.join(logsDir, 'exceptions-%DATE%.log'),
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d'
-    })
-  ],
-  rejectionHandlers: [
-    new DailyRotateFile({
-      filename: path.join(logsDir, 'rejections-%DATE%.log'),
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d'
-    })
-  ]
+  transports: []
 });
 
 // Add console transport in development
@@ -77,13 +34,14 @@ if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: consoleFormat
   }));
-}
-
-// Add console transport in production with JSON format
-if (process.env.NODE_ENV === 'production') {
+} else {
+  // In production (Vercel), use console with JSON format
   logger.add(new winston.transports.Console({
     format: logFormat
   }));
 }
+
+// For serverless environments, file-based logging is not supported
+// Logs will be captured by the platform (Vercel) via console output
 
 module.exports = logger;

@@ -20,8 +20,10 @@ logger.info('Starting Eat Hub API server', {
 // Initialize Express app
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (async, will handle errors in routes)
+connectDB().catch(err => {
+  logger.error('Failed to connect to MongoDB', { error: err.message });
+});
 
 // Middleware
 // CORS configuration
@@ -101,33 +103,36 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`, {
-    port: PORT,
-    environment: process.env.NODE_ENV || 'development'
+// For Vercel serverless deployment, just export the app
+// For local development, start the server
+if (process.env.NODE_ENV !== 'production' && require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  const server = app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`, {
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development'
+    });
+    
+    // Start periodic metrics logging (every 15 minutes)
+    monitor.startMetricsLogging(15);
   });
-  
-  // Start periodic metrics logging (every 15 minutes)
-  monitor.startMetricsLogging(15);
-});
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
   });
-});
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT signal received: closing HTTP server');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
+  process.on('SIGINT', () => {
+    logger.info('SIGINT signal received: closing HTTP server');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
   });
-});
+}
 
 module.exports = app;
