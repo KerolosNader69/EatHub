@@ -1,35 +1,37 @@
 const mongoose = require('mongoose');
 
+// Cached connection for serverless
+let cachedConnection = null;
+
 const connectDB = async () => {
+  // Return cached connection if available
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    console.log('Using cached MongoDB connection');
+    return cachedConnection;
+  }
+
   try {
-    // Check if already connected (important for serverless)
-    if (mongoose.connection.readyState === 1) {
-      console.log('MongoDB already connected');
-      return mongoose.connection;
+    // Close any existing connections in bad state
+    if (mongoose.connection.readyState === 2 || mongoose.connection.readyState === 3) {
+      console.log('Closing stale connection...');
+      await mongoose.connection.close();
     }
 
-    // If connecting, wait for it
-    if (mongoose.connection.readyState === 2) {
-      console.log('MongoDB connection in progress, waiting...');
-      await new Promise((resolve) => {
-        mongoose.connection.once('connected', resolve);
-      });
-      return mongoose.connection;
-    }
-
-    // Optimized settings for serverless (Vercel)
+    // Optimized settings for Vercel serverless
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      maxPoolSize: 1, // Reduced for serverless
-      serverSelectionTimeoutMS: 10000, // Increased timeout
-      socketTimeoutMS: 45000,
-      family: 4 // Use IPv4, skip trying IPv6
+      bufferCommands: false, // Disable buffering for serverless
+      maxPoolSize: 1,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    return conn.connection;
+    cachedConnection = conn.connection;
+    return cachedConnection;
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
-    // Don't exit in serverless environment, just log the error
+    cachedConnection = null;
     throw error;
   }
 };
