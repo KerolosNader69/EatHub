@@ -1,0 +1,169 @@
+.admin-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  padding: 24px;
+}
+
+.admin-login-container {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 48px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.admin-login-header h1 {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+}
+
+.logo-eat {
+  color: #FFFFFF;
+  background-color: #000000;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.logo-hub {
+  color: #C41E3A;
+}
+
+.admin-login-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333333;
+  margin: 16px 0 0 0;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.form-group input {
+  padding: 10px 12px;
+  border: 1px solid #CCCCCC;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #C41E3A;
+}
+
+.form-group input.error {
+  border-color: #FF0000;
+}
+
+.form-group input:disabled {
+  background-color: #F5F5F5;
+  cursor: not-allowed;
+}
+
+.field-error {
+  font-size: 13px;
+  color: #FF0000;
+  margin-top: -4px;
+}
+
+.error-message {
+  background-color: #FFE5E5;
+  color: #CC0000;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  border-left: 4px solid #FF0000;
+}
+
+.btn-primary {
+  background-color: #C41E3A;
+  color: #FFFFFF;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 8px;
+  min-height: 48px; /* Touch-friendly target */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(196, 30, 58, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #A01830;
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background-color: #CCCCCC;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+/* Tablet responsive */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .admin-login-container {
+    max-width: 450px;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .admin-login {
+    padding: 16px;
+  }
+
+  .admin-login-container {
+    padding: 32px 24px;
+  }
+  
+  .admin-login-header h1 {
+    font-size: 28px;
+  }
+  
+  .admin-login-header h2 {
+    font-size: 18px;
+  }
+
+  .form-group input {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 48px;
+  }
+
+  .btn-primary {
+    padding: 14px 24px;
+    font-size: 17px;
+    min-height: 52px;
+  }
+}

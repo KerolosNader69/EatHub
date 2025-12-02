@@ -1,0 +1,19 @@
+{
+  "name": "eat-hub-performance-audit",
+  "version": "1.0.0",
+  "description": "Performance audit tools for Eat Hub application",
+  "main": "performance-audit.js",
+  "scripts": {
+    "audit": "node performance-audit.js",
+    "audit:simple": "node performance-audit-simple.js"
+  },
+  "keywords": ["performance", "lighthouse", "audit"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "lighthouse": "^11.4.0",
+    "chrome-launcher": "^1.1.0",
+    "chrome-remote-interface": "^0.33.0",
+    "axios": "^1.6.2"
+  }
+}

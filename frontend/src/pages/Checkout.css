@@ -1,0 +1,271 @@
+.checkout-page {
+  min-height: calc(100vh - 70px);
+  background-color: #f5f5f5;
+  padding: 32px 16px;
+}
+
+.checkout-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.checkout-container h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.checkout-content {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Order Summary */
+.order-summary {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 90px;
+}
+
+.order-summary h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f5f5f5;
+}
+
+.summary-items {
+  margin-bottom: 20px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-item-name {
+  font-size: 15px;
+  color: #000000;
+  font-weight: 500;
+}
+
+.summary-item-quantity {
+  font-size: 13px;
+  color: #999999;
+}
+
+.summary-item-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 2px solid #000000;
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.total-amount {
+  color: #c41e3a;
+}
+
+/* Checkout Form */
+.checkout-form-container {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-form-container h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 24px;
+}
+
+.error-message {
+  background-color: #ffe6e6;
+  color: #c41e3a;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border-left: 4px solid #c41e3a;
+}
+
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.required {
+  color: #c41e3a;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #c41e3a;
+}
+
+.form-group input.error,
+.form-group textarea.error {
+  border-color: #ff0000;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field-error {
+  font-size: 13px;
+  color: #ff0000;
+  margin-top: -4px;
+}
+
+.submit-button {
+  background-color: #c41e3a;
+  color: #ffffff;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 8px;
+  min-height: 48px; /* Touch-friendly target */
+  touch-action: manipulation;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #a01830;
+}
+
+.submit-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submit-button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .checkout-page {
+    padding: 24px 16px;
+  }
+
+  .checkout-container h1 {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .checkout-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .order-summary {
+    position: static;
+    order: 2;
+  }
+
+  .checkout-form-container {
+    order: 1;
+    padding: 20px;
+  }
+
+  .summary-total {
+    font-size: 16px;
+  }
+
+  .submit-button {
+    padding: 16px 24px;
+    font-size: 17px;
+    min-height: 52px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+  }
+
+  .form-group textarea {
+    min-height: 100px;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .checkout-content {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .order-summary {
+    position: static;
+  }
+}

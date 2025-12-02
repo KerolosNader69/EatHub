@@ -1,0 +1,117 @@
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Menu Item Skeleton */
+.menu-item-skeleton {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-image {
+  width: 100%;
+  border-radius: 0;
+}
+
+.skeleton-content {
+  padding: 16px;
+}
+
+.skeleton-title {
+  margin-bottom: 12px;
+}
+
+.skeleton-text {
+  margin-bottom: 8px;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.skeleton-button {
+  border-radius: 6px;
+}
+
+/* Order Card Skeleton */
+.order-card-skeleton {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.order-card-skeleton .skeleton-text {
+  margin-bottom: 8px;
+}
+
+/* Table Row Skeleton */
+.table-row-skeleton td {
+  padding: 12px;
+}
+
+/* Order List Skeleton */
+.order-list-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #2a2a2a 0%,
+      #3a3a3a 50%,
+      #2a2a2a 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  .menu-item-skeleton,
+  .order-card-skeleton {
+    background-color: #1a1a1a;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .skeleton-content {
+    padding: 12px;
+  }
+
+  .order-card-skeleton {
+    padding: 12px;
+  }
+}
