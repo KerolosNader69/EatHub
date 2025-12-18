@@ -37,7 +37,12 @@ const MenuItemDetail = ({ item, onClose, onAddToCart }) => {
     onClose();
   };
 
-  const totalPrice = (item.price * quantity).toFixed(2);
+  // Use discount price if available
+  const effectivePrice = item.discount_price && item.discount_price < item.price 
+    ? item.discount_price 
+    : item.price;
+  const hasDiscount = item.discount_price && item.discount_price < item.price;
+  const totalPrice = (effectivePrice * quantity).toFixed(2);
 
   // Parse ingredients if it's a string
   const ingredientsList = typeof item.ingredients === 'string' 
@@ -84,7 +89,19 @@ const MenuItemDetail = ({ item, onClose, onAddToCart }) => {
           {/* Product Info */}
           <div className="product-detail__info">
             <h1 className="product-detail__name">{item.name}</h1>
-            <p className="product-detail__price">{item.price.toFixed(2)} EGP</p>
+            <div className="product-detail__price-container">
+              {hasDiscount ? (
+                <>
+                  <span className="product-detail__price-original">{item.price.toFixed(2)} EGP</span>
+                  <span className="product-detail__price product-detail__price--sale">{item.discount_price.toFixed(2)} EGP</span>
+                  <span className="product-detail__discount-badge">
+                    {Math.round((1 - item.discount_price / item.price) * 100)}% OFF
+                  </span>
+                </>
+              ) : (
+                <p className="product-detail__price">{item.price.toFixed(2)} EGP</p>
+              )}
+            </div>
 
             {item.description && (
               <p className="product-detail__description">{item.description}</p>

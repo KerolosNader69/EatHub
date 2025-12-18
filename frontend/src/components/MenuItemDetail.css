@@ -366,3 +366,33 @@
     border-top: 2px solid #000;
   }
 }
+
+
+/* Discount Price Styling */
+.product-detail__price-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.product-detail__price-original {
+  font-size: 16px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.product-detail__price--sale {
+  color: #C41E3A;
+  font-weight: 700;
+}
+
+.product-detail__discount-badge {
+  background: linear-gradient(135deg, #FF6B6B, #C41E3A);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}

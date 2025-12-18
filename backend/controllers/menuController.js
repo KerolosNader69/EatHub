@@ -97,7 +97,7 @@ const getMenuItemById = async (req, res) => {
 const createMenuItem = async (req, res) => {
   try {
     const { 
-      name, description, price, category, ingredients, portionSize, available
+      name, description, price, discountPrice, category, ingredients, portionSize, available
     } = req.body;
 
     // Validate required fields
@@ -111,7 +111,7 @@ const createMenuItem = async (req, res) => {
       });
     }
 
-    // Prepare menu item data (only core fields that exist in database)
+    // Prepare menu item data
     const menuItemData = {
       name,
       description,
@@ -121,6 +121,11 @@ const createMenuItem = async (req, res) => {
       portion_size: portionSize || '',
       available: available === 'false' || available === false ? false : true
     };
+
+    // Add discount_price if provided
+    if (discountPrice) {
+      menuItemData.discount_price = parseFloat(discountPrice);
+    }
 
     // Add image as base64 data URL if file was uploaded
     if (req.file) {
@@ -166,10 +171,10 @@ const updateMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
     const { 
-      name, description, price, category, ingredients, portionSize, available
+      name, description, price, discountPrice, category, ingredients, portionSize, available
     } = req.body;
 
-    // Prepare update data (only core fields that exist in database)
+    // Prepare update data
     const updateData = {};
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
@@ -181,6 +186,11 @@ const updateMenuItem = async (req, res) => {
     if (portionSize !== undefined) updateData.portion_size = portionSize;
     if (available !== undefined) {
       updateData.available = available === 'false' || available === false ? false : true;
+    }
+    
+    // Handle discount_price - can be set or cleared
+    if (discountPrice !== undefined) {
+      updateData.discount_price = discountPrice ? parseFloat(discountPrice) : null;
     }
 
     // Update image as base64 data URL if new file was uploaded
@@ -275,14 +285,29 @@ const getFeaturedItems = async (req, res) => {
  */
 const getAnnouncement = async (_req, res) => {
   try {
-    // Get the newest available menu item with an image to use as promo banner
-    const { data: items, error } = await supabase
+    // First try to get an item with a discount price (prioritize discounted items)
+    let { data: items, error } = await supabase
       .from('menu_items')
       .select('*')
       .eq('available', true)
       .not('image', 'is', null)
+      .not('discount_price', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1);
+
+    // If no discounted items, get the newest item with an image
+    if (error || !items || items.length === 0) {
+      const result = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('available', true)
+        .not('image', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      items = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.log('Error fetching announcement:', error.message);
@@ -292,19 +317,11 @@ const getAnnouncement = async (_req, res) => {
       });
     }
 
-    // Transform the item to announcement format
     const item = items && items.length > 0 ? items[0] : null;
-    const announcement = item ? {
-      ...item,
-      announcement_title: item.name,
-      announcement_subtitle: item.description,
-      announcement_price: item.price,
-      announcement_image: item.image
-    } : null;
 
     res.status(200).json({
       success: true,
-      data: announcement
+      data: item
     });
   } catch (error) {
     console.error('Error fetching announcement:', error);

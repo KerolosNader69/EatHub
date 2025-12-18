@@ -82,9 +82,16 @@ const MenuListCard = ({ item, onAddToCart, onClick }) => {
           
           <span className="menu-list-card__dot">•</span>
           
-          <span className="menu-list-card__price">
-            {item.price.toFixed(2)} EGP
-          </span>
+          {item.discount_price && item.discount_price < item.price ? (
+            <span className="menu-list-card__price menu-list-card__price--discount">
+              <span className="menu-list-card__price-original">{item.price.toFixed(2)}</span>
+              <span className="menu-list-card__price-sale">{item.discount_price.toFixed(2)} EGP</span>
+            </span>
+          ) : (
+            <span className="menu-list-card__price">
+              {item.price.toFixed(2)} EGP
+            </span>
+          )}
         </div>
 
         {item.description && (
