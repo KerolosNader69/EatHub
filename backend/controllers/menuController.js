@@ -11,7 +11,10 @@ const getMenuItems = async (req, res) => {
     // Check if request is from admin (has auth token)
     const isAdmin = req.headers.authorization;
     
-    let query = supabase
+    // Use admin client for admin requests to bypass RLS, regular client for public
+    const client = isAdmin ? supabaseAdmin : supabase;
+    
+    let query = client
       .from('menu_items')
       .select('*');
     
@@ -25,6 +28,8 @@ const getMenuItems = async (req, res) => {
       .order('name', { ascending: true });
 
     if (error) throw error;
+
+    console.log(`Fetched ${menuItems?.length || 0} menu items (isAdmin: ${!!isAdmin})`);
 
     res.status(200).json({
       success: true,
