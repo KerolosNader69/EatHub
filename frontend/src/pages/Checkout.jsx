@@ -10,7 +10,7 @@ import './Checkout.css';
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
-  const { isAuthenticated, admin: user, user: authUser } = useAuth();
+  const { isAuthenticated, admin: user } = useAuth();
   
   // Constants for fees (same as Cart page)
   const DELIVERY_FEE = 20;
@@ -139,7 +139,8 @@ const Checkout = () => {
       };
       
       // Create order with user ID for rewards
-      const userId = authUser?.id || user?.id || null;
+      const userId = user?.id || null;
+      console.log('Creating order with userId:', userId); // Debug log
       const response = await createOrder(orderData, userId);
       
       // Navigate to confirmation page with order data

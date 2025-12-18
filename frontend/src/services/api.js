@@ -9,13 +9,27 @@ const api = axios.create({
   }
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and user ID
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('eatHubToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add user ID header for rewards tracking
+    const adminData = localStorage.getItem('eatHubAdmin');
+    if (adminData) {
+      try {
+        const admin = JSON.parse(adminData);
+        if (admin?.id) {
+          config.headers['x-user-id'] = admin.id;
+        }
+      } catch (e) {
+        console.error('Error parsing admin data:', e);
+      }
+    }
+    
     return config;
   },
   (error) => {

@@ -65,57 +65,89 @@ function writeTransactionsData(transactions) {
  */
 const getRewardsStatus = async (req, res) => {
   try {
-    // For now, we'll use a guest user approach since auth might not be fully implemented
-    // In a real implementation, this would get the user ID from authentication
     const userId = req.headers['x-user-id'] || 'guest';
+    console.log('Getting rewards status for user:', userId);
 
     let userRewards = null;
     
     if (userId !== 'guest') {
-      // Get user's current rewards status from JSON file
-      const allUserRewards = readUserRewardsData();
-      userRewards = allUserRewards[userId];
-
-      // If user doesn't have a rewards record, create one
-      if (!userRewards) {
-        userRewards = {
-          user_id: userId,
-          current_points: 0,
-          total_earned: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+      // Try to get from Supabase first
+      try {
+        const { data: supabaseRewards, error } = await supabase
+          .from('user_rewards')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
         
-        allUserRewards[userId] = userRewards;
-        writeUserRewardsData(allUserRewards);
+        if (!error && supabaseRewards) {
+          userRewards = {
+            user_id: supabaseRewards.user_id,
+            current_points: supabaseRewards.current_points || 0,
+            total_earned: supabaseRewards.total_earned || 0
+          };
+          console.log('Found user rewards in Supabase:', userRewards);
+        }
+      } catch (supabaseError) {
+        console.log('Supabase rewards not found, checking JSON file');
+      }
+      
+      // Fallback to JSON file if not in Supabase
+      if (!userRewards) {
+        const allUserRewards = readUserRewardsData();
+        userRewards = allUserRewards[userId];
+
+        if (!userRewards) {
+          userRewards = {
+            user_id: userId,
+            current_points: 0,
+            total_earned: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          allUserRewards[userId] = userRewards;
+          writeUserRewardsData(allUserRewards);
+        }
       }
     }
 
-    // Get available rewards from JSON file
-    const availableRewards = readRewardsData().filter(reward => reward.is_active);
-
-    // Get recent transactions if user is logged in
-    let recentTransactions = [];
-    if (userId !== 'guest') {
-      const allTransactions = readTransactionsData();
-      recentTransactions = allTransactions
-        .filter(t => t.user_id === userId)
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .slice(0, 10);
+    // Get available rewards from Supabase first, then JSON file
+    let availableRewards = [];
+    try {
+      const { data: supabaseRewardsData } = await supabase
+        .from('rewards')
+        .select('*')
+        .eq('is_active', true);
+      
+      if (supabaseRewardsData && supabaseRewardsData.length > 0) {
+        availableRewards = supabaseRewardsData.map(r => ({
+          id: r.id,
+          title: r.title,
+          description: r.description,
+          pointsCost: r.points_cost,
+          rewardType: r.reward_type,
+          rewardValue: r.reward_value
+        }));
+      }
+    } catch (e) {
+      // Fallback to JSON
+      availableRewards = readRewardsData().filter(reward => reward.is_active);
     }
+
+    // Transform response for frontend
+    const responseData = {
+      currentPoints: userRewards?.current_points || 0,
+      totalEarned: userRewards?.total_earned || 0,
+      availableRewards: availableRewards || [],
+      isGuest: userId === 'guest',
+      userId: userId
+    };
+
+    console.log('Returning rewards data:', responseData);
 
     res.status(200).json({
       success: true,
-      data: {
-        userRewards: userRewards || {
-          current_points: 0,
-          total_earned: 0,
-          user_id: userId
-        },
-        availableRewards: availableRewards || [],
-        recentTransactions,
-        isGuest: userId === 'guest'
-      }
+      data: responseData
     });
   } catch (error) {
     console.error('Error fetching rewards status:', error);

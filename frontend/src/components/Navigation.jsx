@@ -7,7 +7,7 @@ import './Navigation.css';
 
 const Navigation = () => {
   const { itemCount } = useCart();
-  const { isAuthenticated, admin: user, user: authUser, logout } = useAuth();
+  const { isAuthenticated, admin: user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userPoints, setUserPoints] = useState(0);
   const location = useLocation();
@@ -15,7 +15,7 @@ const Navigation = () => {
   // Fetch user points when authenticated
   useEffect(() => {
     const fetchPoints = async () => {
-      if (isAuthenticated && authUser?.id) {
+      if (isAuthenticated && user?.id) {
         try {
           const data = await getRewardsStatus();
           setUserPoints(data.currentPoints || 0);
@@ -27,7 +27,7 @@ const Navigation = () => {
       }
     };
     fetchPoints();
-  }, [isAuthenticated, authUser]);
+  }, [isAuthenticated, user]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
