@@ -275,26 +275,32 @@ const getFeaturedItems = async (req, res) => {
  */
 const getAnnouncement = async (_req, res) => {
   try {
-    // Try to fetch announcement items (requires announcement columns in database)
-    const { data: announcements, error } = await supabase
+    // Get the newest available menu item with an image to use as promo banner
+    const { data: items, error } = await supabase
       .from('menu_items')
       .select('*')
-      .eq('is_announcement', true)
-      .eq('announcement_active', true)
       .eq('available', true)
-      .order('announcement_priority', { ascending: true })
+      .not('image', 'is', null)
+      .order('created_at', { ascending: false })
       .limit(1);
 
-    // If columns don't exist or other error, return null gracefully
     if (error) {
-      console.log('Announcement columns may not exist yet:', error.message);
+      console.log('Error fetching announcement:', error.message);
       return res.status(200).json({
         success: true,
         data: null
       });
     }
 
-    const announcement = announcements && announcements.length > 0 ? announcements[0] : null;
+    // Transform the item to announcement format
+    const item = items && items.length > 0 ? items[0] : null;
+    const announcement = item ? {
+      ...item,
+      announcement_title: item.name,
+      announcement_subtitle: item.description,
+      announcement_price: item.price,
+      announcement_image: item.image
+    } : null;
 
     res.status(200).json({
       success: true,
@@ -304,7 +310,7 @@ const getAnnouncement = async (_req, res) => {
     console.error('Error fetching announcement:', error);
     res.status(200).json({
       success: true,
-      data: null // Return null instead of error to not break the home page
+      data: null
     });
   }
 };
