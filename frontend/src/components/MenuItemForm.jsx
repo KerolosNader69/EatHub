@@ -303,14 +303,27 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
           </div>
           
           <div className="form-row">
-            <div className="form-group checkbox-group">
-              <label>
+            <div className="form-group">
+              <label className="availability-checkbox">
                 <input
                   type="checkbox"
                   name="available"
                   checked={formData.available}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    console.log('Checkbox changed:', e.target.checked);
+                    setFormData(prev => ({
+                      ...prev,
+                      available: e.target.checked
+                    }));
+                  }}
                   disabled={isSubmitting}
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    marginRight: '12px',
+                    cursor: 'pointer',
+                    accentColor: '#C41E3A'
+                  }}
                 />
                 <span>Available for ordering</span>
               </label>
