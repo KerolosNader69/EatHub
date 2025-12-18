@@ -122,14 +122,17 @@ const createMenuItem = async (req, res) => {
       menuItemData.image = `data:${req.file.mimetype};base64,${base64Image}`;
     }
 
-    // Create menu item in Supabase
-    const { data: menuItem, error } = await supabase
+    // Create menu item in Supabase (use admin client to bypass RLS)
+    const { data: menuItem, error } = await supabaseAdmin
       .from('menu_items')
       .insert([menuItemData])
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase insert error:', error);
+      throw error;
+    }
 
     res.status(201).json({
       success: true,
@@ -179,19 +182,20 @@ const updateMenuItem = async (req, res) => {
       updateData.image = `data:${req.file.mimetype};base64,${base64Image}`;
     }
 
-    // Update menu item in Supabase
-    const { data: menuItem, error } = await supabase
+    // Update menu item in Supabase (use admin client to bypass RLS)
+    const { data: menuItem, error } = await supabaseAdmin
       .from('menu_items')
       .update(updateData)
       .eq('id', id)
       .select()
       .single();
 
-    if (error || !menuItem) {
+    if (error) {
+      console.error('Supabase update error:', error);
       return res.status(404).json({
         success: false,
         error: {
-          message: 'Menu item not found',
+          message: error.message || 'Menu item not found',
           code: 'NOT_FOUND'
         }
       });
@@ -207,7 +211,7 @@ const updateMenuItem = async (req, res) => {
     res.status(500).json({
       success: false,
       error: {
-        message: 'Failed to update menu item',
+        message: error.message || 'Failed to update menu item',
         code: 'UPDATE_ERROR'
       }
     });
