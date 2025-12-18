@@ -4,6 +4,7 @@ const {
   getMenuItems,
   getMenuItemById,
   getFeaturedItems,
+  getAnnouncement,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem
@@ -14,6 +15,7 @@ const upload = require('../config/multer');
 // Public routes - customer-facing
 router.get('/', getMenuItems);
 router.get('/featured', getFeaturedItems);
+router.get('/announcement', getAnnouncement);
 router.get('/:id', getMenuItemById);
 
 // Admin routes - protected

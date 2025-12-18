@@ -11,7 +11,14 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
     category: 'chicken_burgers',
     ingredients: '',
     portionSize: '',
-    available: true
+    available: true,
+    // Announcement fields
+    isAnnouncement: false,
+    announcementTitle: '',
+    announcementSubtitle: '',
+    announcementPrice: '',
+    announcementPriority: 1,
+    announcementActive: true
   });
   
   const [imageFile, setImageFile] = useState(null);
@@ -28,8 +35,15 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
         price: item.price || '',
         category: item.category || 'chicken_burgers',
         ingredients: Array.isArray(item.ingredients) ? item.ingredients.join(', ') : '',
-        portionSize: item.portionSize || '',
-        available: item.available !== undefined ? item.available : true
+        portionSize: item.portionSize || item.portion_size || '',
+        available: item.available !== undefined ? item.available : true,
+        // Announcement fields
+        isAnnouncement: item.is_announcement || false,
+        announcementTitle: item.announcement_title || '',
+        announcementSubtitle: item.announcement_subtitle || '',
+        announcementPrice: item.announcement_price || '',
+        announcementPriority: item.announcement_priority || 1,
+        announcementActive: item.announcement_active !== undefined ? item.announcement_active : true
       });
       
       if (item.image) {
@@ -147,6 +161,16 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
       
       if (formData.portionSize.trim()) {
         submitData.append('portionSize', formData.portionSize.trim());
+      }
+
+      // Announcement fields
+      submitData.append('isAnnouncement', formData.isAnnouncement ? 'true' : 'false');
+      if (formData.isAnnouncement) {
+        submitData.append('announcementTitle', formData.announcementTitle || formData.name);
+        submitData.append('announcementSubtitle', formData.announcementSubtitle || formData.description);
+        submitData.append('announcementPrice', formData.announcementPrice || formData.price);
+        submitData.append('announcementPriority', formData.announcementPriority || 1);
+        submitData.append('announcementActive', formData.announcementActive ? 'true' : 'false');
       }
       
       if (imageFile) {
@@ -310,7 +334,6 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
                   name="available"
                   checked={formData.available}
                   onChange={(e) => {
-                    console.log('Checkbox changed:', e.target.checked);
                     setFormData(prev => ({
                       ...prev,
                       available: e.target.checked
@@ -328,6 +351,122 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
                 <span>Available for ordering</span>
               </label>
             </div>
+          </div>
+
+          {/* Announcement Offer Section */}
+          <div className="form-section announcement-section">
+            <h4>🔥 Announcement Offer (Promo Banner)</h4>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="availability-checkbox">
+                  <input
+                    type="checkbox"
+                    name="isAnnouncement"
+                    checked={formData.isAnnouncement}
+                    onChange={(e) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        isAnnouncement: e.target.checked
+                      }));
+                    }}
+                    disabled={isSubmitting}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      marginRight: '12px',
+                      cursor: 'pointer',
+                      accentColor: '#C41E3A'
+                    }}
+                  />
+                  <span>Show as Promo Banner on Home Page</span>
+                </label>
+              </div>
+            </div>
+
+            {formData.isAnnouncement && (
+              <>
+                <div className="form-row two-columns">
+                  <div className="form-group">
+                    <label htmlFor="announcementTitle">Banner Title</label>
+                    <input
+                      type="text"
+                      id="announcementTitle"
+                      name="announcementTitle"
+                      value={formData.announcementTitle}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      placeholder="e.g., Special BBQ Deal!"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="announcementPrice">Banner Price (EGP)</label>
+                    <input
+                      type="number"
+                      id="announcementPrice"
+                      name="announcementPrice"
+                      value={formData.announcementPrice}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      step="0.01"
+                      min="0"
+                      placeholder="Leave empty to use item price"
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="announcementSubtitle">Banner Subtitle</label>
+                    <input
+                      type="text"
+                      id="announcementSubtitle"
+                      name="announcementSubtitle"
+                      value={formData.announcementSubtitle}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      placeholder="e.g., Get 3 burgers for the price of 2!"
+                    />
+                  </div>
+                </div>
+                <div className="form-row two-columns">
+                  <div className="form-group">
+                    <label htmlFor="announcementPriority">Priority (lower = higher)</label>
+                    <input
+                      type="number"
+                      id="announcementPriority"
+                      name="announcementPriority"
+                      value={formData.announcementPriority}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      min="1"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="availability-checkbox" style={{ marginTop: '28px' }}>
+                      <input
+                        type="checkbox"
+                        name="announcementActive"
+                        checked={formData.announcementActive}
+                        onChange={(e) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            announcementActive: e.target.checked
+                          }));
+                        }}
+                        disabled={isSubmitting}
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          marginRight: '8px',
+                          cursor: 'pointer',
+                          accentColor: '#C41E3A'
+                        }}
+                      />
+                      <span>Banner Active</span>
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           
           <div className="form-actions">

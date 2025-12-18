@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import Navigation from '../components/Navigation';
+import PromoBanner from '../components/PromoBanner';
 import CategoryGrid from '../components/CategoryGrid';
 import ActionButtons from '../components/ActionButtons';
 import FeaturedItems from '../components/FeaturedItems';
@@ -9,12 +10,14 @@ import LazyVoucherModal from '../components/LazyVoucherModal';
 import LazyRewardsModal from '../components/LazyRewardsModal';
 import { getAvailableVouchers } from '../services/voucherService';
 import { getRewardsStatus } from '../services/rewardsService';
+import { getAnnouncement } from '../services/menuService';
 import './HomePage.css';
 
 const HomePage = () => {
   const { isAuthenticated } = useAuth();
   const [voucherCount, setVoucherCount] = useState(0);
   const [rewardPoints, setRewardPoints] = useState(null);
+  const [announcement, setAnnouncement] = useState(null);
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
@@ -32,8 +35,8 @@ const HomePage = () => {
       setPageLoading(true);
       setError(null);
       
-      // Fetch vouchers and rewards data concurrently
-      const promises = [fetchVouchersData()];
+      // Fetch vouchers, announcement, and rewards data concurrently
+      const promises = [fetchVouchersData(), fetchAnnouncementData()];
       if (isAuthenticated) {
         promises.push(fetchRewardsData());
       }
@@ -44,6 +47,16 @@ const HomePage = () => {
       setError('Failed to load page data. Please try again.');
     } finally {
       setPageLoading(false);
+    }
+  };
+
+  const fetchAnnouncementData = async () => {
+    try {
+      const announcementData = await getAnnouncement();
+      setAnnouncement(announcementData);
+    } catch (err) {
+      console.error('Error fetching announcement:', err);
+      setAnnouncement(null);
     }
   };
 
@@ -154,6 +167,20 @@ const HomePage = () => {
       
       <main id="main-content" className="home-page__main">
         <div className="home-page__container">
+          {/* Promo Banner Section */}
+          {announcement && (
+            <ErrorBoundary>
+              <section 
+                className="home-page__section home-page__promo"
+                aria-label="Special promotion"
+              >
+                <div className="home-page__section-content">
+                  <PromoBanner announcement={announcement} />
+                </div>
+              </section>
+            </ErrorBoundary>
+          )}
+
           {/* Category Grid Section */}
           <ErrorBoundary>
             <section 

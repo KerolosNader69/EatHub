@@ -96,7 +96,11 @@ const getMenuItemById = async (req, res) => {
  */
 const createMenuItem = async (req, res) => {
   try {
-    const { name, description, price, category, ingredients, portionSize, available } = req.body;
+    const { 
+      name, description, price, category, ingredients, portionSize, available,
+      isAnnouncement, announcementTitle, announcementSubtitle, announcementPrice,
+      announcementPriority, announcementActive
+    } = req.body;
 
     // Validate required fields
     if (!name || !description || !price || !category) {
@@ -118,7 +122,14 @@ const createMenuItem = async (req, res) => {
       ingredients: ingredients ? (Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients)) : [],
       portion_size: portionSize || '',
       // Convert string "true"/"false" to boolean
-      available: available === 'false' || available === false ? false : true
+      available: available === 'false' || available === false ? false : true,
+      // Announcement fields
+      is_announcement: isAnnouncement === 'true' || isAnnouncement === true,
+      announcement_title: announcementTitle || null,
+      announcement_subtitle: announcementSubtitle || null,
+      announcement_price: announcementPrice ? parseFloat(announcementPrice) : null,
+      announcement_priority: announcementPriority ? parseInt(announcementPriority) : 999,
+      announcement_active: announcementActive === 'false' || announcementActive === false ? false : true
     };
 
     // Add image as base64 data URL if file was uploaded
@@ -164,7 +175,11 @@ const createMenuItem = async (req, res) => {
 const updateMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, price, category, ingredients, portionSize, available } = req.body;
+    const { 
+      name, description, price, category, ingredients, portionSize, available,
+      isAnnouncement, announcementTitle, announcementSubtitle, announcementPrice,
+      announcementPriority, announcementActive
+    } = req.body;
 
     // Prepare update data
     const updateData = {};
@@ -179,6 +194,18 @@ const updateMenuItem = async (req, res) => {
     // Convert string "true"/"false" to boolean
     if (available !== undefined) {
       updateData.available = available === 'false' || available === false ? false : true;
+    }
+
+    // Announcement fields
+    if (isAnnouncement !== undefined) {
+      updateData.is_announcement = isAnnouncement === 'true' || isAnnouncement === true;
+    }
+    if (announcementTitle !== undefined) updateData.announcement_title = announcementTitle || null;
+    if (announcementSubtitle !== undefined) updateData.announcement_subtitle = announcementSubtitle || null;
+    if (announcementPrice !== undefined) updateData.announcement_price = announcementPrice ? parseFloat(announcementPrice) : null;
+    if (announcementPriority !== undefined) updateData.announcement_priority = announcementPriority ? parseInt(announcementPriority) : 999;
+    if (announcementActive !== undefined) {
+      updateData.announcement_active = announcementActive === 'false' || announcementActive === false ? false : true;
     }
 
     // Update image as base64 data URL if new file was uploaded
@@ -262,6 +289,39 @@ const getFeaturedItems = async (req, res) => {
         message: 'Failed to fetch featured items',
         code: 'FETCH_ERROR'
       }
+    });
+  }
+};
+
+/**
+ * @desc    Get active announcement for promo banner
+ * @route   GET /api/menu/announcement
+ * @access  Public
+ */
+const getAnnouncement = async (req, res) => {
+  try {
+    const { data: announcements, error } = await supabase
+      .from('menu_items')
+      .select('*')
+      .eq('is_announcement', true)
+      .eq('announcement_active', true)
+      .eq('available', true)
+      .order('announcement_priority', { ascending: true })
+      .limit(1);
+
+    if (error) throw error;
+
+    const announcement = announcements && announcements.length > 0 ? announcements[0] : null;
+
+    res.status(200).json({
+      success: true,
+      data: announcement
+    });
+  } catch (error) {
+    console.error('Error fetching announcement:', error);
+    res.status(200).json({
+      success: true,
+      data: null // Return null instead of error to not break the home page
     });
   }
 };
@@ -370,6 +430,7 @@ module.exports = {
   getMenuItems,
   getMenuItemById,
   getFeaturedItems,
+  getAnnouncement,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem

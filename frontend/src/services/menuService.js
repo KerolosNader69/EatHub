@@ -112,6 +112,20 @@ const getCategoriesBase = async () => {
 };
 
 /**
+ * Get active announcement for promo banner (base function without caching)
+ * @returns {Promise<Object|null>} Announcement item or null
+ */
+const getAnnouncementBase = async () => {
+  try {
+    const response = await publicApi.get('/menu/announcement');
+    return response.data.data || null;
+  } catch (error) {
+    console.error('Error fetching announcement:', error);
+    return null;
+  }
+};
+
+/**
  * Get featured menu items with caching and retry logic
  * @param {boolean} forceRefresh - Skip cache and fetch fresh data
  * @returns {Promise<Array>} Array of featured menu items
@@ -146,6 +160,14 @@ export const getCategories = async (forceRefresh = false) => {
 };
 
 /**
+ * Get active announcement for promo banner with retry logic
+ * @returns {Promise<Object|null>} Announcement item or null
+ */
+export const getAnnouncement = async () => {
+  return withRetry(getAnnouncementBase, { maxRetries: 2 })();
+};
+
+/**
  * Invalidate menu cache (call after menu updates)
  */
 export const invalidateMenuCache = () => {
@@ -156,7 +178,8 @@ const menuService = {
   getMenuItems,
   getMenuItem,
   getFeaturedItems,
-  getCategories
+  getCategories,
+  getAnnouncement
 };
 
 export default menuService;
