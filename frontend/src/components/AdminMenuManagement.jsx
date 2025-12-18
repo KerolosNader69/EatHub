@@ -52,7 +52,7 @@ const AdminMenuManagement = () => {
     try {
       if (editingItem) {
         // Update existing item
-        await adminService.updateMenuItem(editingItem._id, formData);
+        await adminService.updateMenuItem(editingItem.id, formData);
       } else {
         // Create new item
         await adminService.createMenuItem(formData);
@@ -70,12 +70,12 @@ const AdminMenuManagement = () => {
   const handleToggleAvailability = async (item) => {
     try {
       const updatedData = { available: !item.available };
-      await adminService.updateMenuItem(item._id, updatedData);
+      await adminService.updateMenuItem(item.id, updatedData);
       
       // Update local state immediately for UI responsiveness
       setMenuItems(prevItems =>
         prevItems.map(i =>
-          i._id === item._id ? { ...i, available: !i.available } : i
+          i.id === item.id ? { ...i, available: !i.available } : i
         )
       );
     } catch (err) {
@@ -94,12 +94,21 @@ const AdminMenuManagement = () => {
     if (!deleteConfirm) return;
     
     try {
-      await adminService.deleteMenuItem(deleteConfirm._id);
-      setMenuItems(prevItems => prevItems.filter(i => i._id !== deleteConfirm._id));
+      await adminService.deleteMenuItem(deleteConfirm.id);
+      setMenuItems(prevItems => prevItems.filter(i => i.id !== deleteConfirm.id));
       setDeleteConfirm(null);
     } catch (err) {
       console.error('Error deleting menu item:', err);
-      setError('Failed to delete menu item. Please try again.');
+      
+      // Handle specific error cases
+      if (err.code === 'REFERENCED_IN_ORDERS') {
+        setError('Cannot delete this menu item because it has been ordered by customers. You can mark it as unavailable instead.');
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Failed to delete menu item. Please try again.');
+      }
+      
       setDeleteConfirm(null);
     }
   };
@@ -110,10 +119,12 @@ const AdminMenuManagement = () => {
 
   const getCategoryLabel = (category) => {
     const labels = {
-      appetizers: 'Appetizers',
-      main_courses: 'Main Courses',
-      desserts: 'Desserts',
-      beverages: 'Beverages'
+      chicken_burgers: 'Chicken Burgers',
+      beef_burgers: 'Beef Burgers',
+      box_deals: 'Box Deals',
+      drinks: 'Drinks',
+      potatoes: 'Potatoes',
+      deals_night: 'Deals Night'
     };
     return labels[category] || category;
   };
@@ -155,7 +166,7 @@ const AdminMenuManagement = () => {
           </div>
         ) : (
           menuItems.map(item => (
-            <div key={item._id} className="menu-item-card">
+            <div key={item.id} className="menu-item-card">
               <div className="item-image">
                 {item.image ? (
                   <OptimizedImage src={item.image} alt={item.name} lazy={true} />
@@ -167,7 +178,7 @@ const AdminMenuManagement = () => {
               <div className="item-details">
                 <h3>{item.name}</h3>
                 <p className="item-category">{getCategoryLabel(item.category)}</p>
-                <p className="item-price">${item.price.toFixed(2)}</p>
+                <p className="item-price">{item.price.toFixed(2)} EGP</p>
                 <p className="item-description">{item.description}</p>
               </div>
               

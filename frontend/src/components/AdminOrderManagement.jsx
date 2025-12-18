@@ -12,17 +12,39 @@ const AdminOrderManagement = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [expandedOrders, setExpandedOrders] = useState(new Set());
 
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = useCallback(async (showLoadingState = true) => {
     try {
+      if (showLoadingState) {
+        setLoading(true);
+      }
       setError('');
       const filterParam = statusFilter !== 'all' ? statusFilter : null;
       const fetchedOrders = await adminService.getOrders(filterParam);
-      setOrders(fetchedOrders);
+      
+      // Transform orders to match expected format
+      const transformedOrders = fetchedOrders.map(order => ({
+        ...order,
+        orderNumber: order.order_number,
+        customerInfo: {
+          name: order.customer_name,
+          phone: order.customer_phone,
+          address: order.customer_address
+        },
+        items: order.order_items || [],
+        totalAmount: parseFloat(order.total_amount),
+        specialInstructions: order.special_instructions,
+        createdAt: order.created_at,
+        estimatedDelivery: order.estimated_delivery
+      }));
+      
+      setOrders(transformedOrders);
     } catch (err) {
       console.error('Error fetching orders:', err);
       setError('Failed to load orders. Please try again.');
     } finally {
-      setLoading(false);
+      if (showLoadingState) {
+        setLoading(false);
+      }
     }
   }, [statusFilter]);
 
@@ -30,14 +52,18 @@ const AdminOrderManagement = () => {
     fetchOrders();
   }, [fetchOrders]);
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 30 seconds (without loading state)
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchOrders();
+      fetchOrders(false); // Don't show loading state for auto-refresh
     }, 30000);
 
     return () => clearInterval(interval);
   }, [fetchOrders]);
+
+  const handleRefresh = async () => {
+    await fetchOrders(false); // Refresh without full loading state
+  };
 
   const handleStatusChange = async (orderNumber, newStatus) => {
     try {
@@ -55,7 +81,7 @@ const AdminOrderManagement = () => {
       console.error('Error updating order status:', err);
       setError('Failed to update order status. Please try again.');
       // Refresh to get correct state
-      fetchOrders();
+      fetchOrders(false);
     }
   };
 
@@ -127,7 +153,7 @@ const AdminOrderManagement = () => {
     <div className="admin-order-management">
       <div className="orders-header">
         <h2>Order Management</h2>
-        <button onClick={fetchOrders} className="btn-refresh">
+        <button onClick={handleRefresh} className="btn-refresh" title="Refresh orders">
           ↻ Refresh
         </button>
       </div>
@@ -178,7 +204,7 @@ const AdminOrderManagement = () => {
                       <span className="order-date">{formatDate(order.createdAt)}</span>
                     </div>
                     <div className="order-items-summary">
-                      {order.items.length} item{order.items.length !== 1 ? 's' : ''} • ${order.totalAmount.toFixed(2)}
+                      {order.items.length} item{order.items.length !== 1 ? 's' : ''} • {order.totalAmount.toFixed(2)} EGP
                     </div>
                   </div>
 
@@ -217,14 +243,14 @@ const AdminOrderManagement = () => {
                               {item.name} × {item.quantity}
                             </span>
                             <span className="item-price">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              {(item.price * item.quantity).toFixed(2)} EGP
                             </span>
                           </div>
                         ))}
                       </div>
                       <div className="order-total">
                         <span>Total:</span>
-                        <span className="total-amount">${order.totalAmount.toFixed(2)}</span>
+                        <span className="total-amount">{order.totalAmount.toFixed(2)} EGP</span>
                       </div>
                     </div>
 
