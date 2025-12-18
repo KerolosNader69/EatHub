@@ -116,9 +116,10 @@ const createMenuItem = async (req, res) => {
       available: available === 'false' || available === false ? false : true
     };
 
-    // Add image path if file was uploaded
+    // Add image as base64 data URL if file was uploaded
     if (req.file) {
-      menuItemData.image = `/uploads/${req.file.filename}`;
+      const base64Image = req.file.buffer.toString('base64');
+      menuItemData.image = `data:${req.file.mimetype};base64,${base64Image}`;
     }
 
     // Create menu item in Supabase
@@ -172,9 +173,10 @@ const updateMenuItem = async (req, res) => {
       updateData.available = available === 'false' || available === false ? false : true;
     }
 
-    // Update image if new file was uploaded
+    // Update image as base64 data URL if new file was uploaded
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+      const base64Image = req.file.buffer.toString('base64');
+      updateData.image = `data:${req.file.mimetype};base64,${base64Image}`;
     }
 
     // Update menu item in Supabase
