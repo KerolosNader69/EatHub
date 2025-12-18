@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './OrderConfirmation.css';
@@ -7,8 +7,13 @@ const OrderConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { clearCart } = useCart();
+  const [copied, setCopied] = useState(false);
   
   const { orderNumber, estimatedDelivery, order } = location.state || {};
+  
+  // Constants for fees
+  const DELIVERY_FEE = 20;
+  const SERVICE_FEE = 10;
 
   // Clear cart when component mounts
   useEffect(() => {
@@ -43,9 +48,41 @@ const OrderConfirmation = () => {
   };
 
   const orderStatus = order.status || 'received';
-  const orderItems = order.items || [];
-  const customerInfo = order.customerInfo || {};
-  const totalAmount = order.totalAmount || 0;
+  const orderItems = order.items || order.order_items || [];
+  
+  // Get customer info from order object (Supabase returns snake_case)
+  const customerInfo = {
+    name: order.customer_name || order.customerInfo?.name || '',
+    phone: order.customer_phone || order.customerInfo?.phone || '',
+    address: order.customer_address || order.customerInfo?.address || ''
+  };
+  
+  // Calculate subtotal from items
+  const subtotal = orderItems.reduce((sum, item) => {
+    return sum + (parseFloat(item.price) || 0) * (item.quantity || 1);
+  }, 0);
+  
+  // Total with fees
+  const totalAmount = subtotal + DELIVERY_FEE + SERVICE_FEE;
+  
+  // Copy order number to clipboard
+  const handleCopyOrderNumber = async () => {
+    try {
+      await navigator.clipboard.writeText(orderNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = orderNumber;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="order-confirmation-page">
@@ -72,7 +109,26 @@ const OrderConfirmation = () => {
         {/* Order Number */}
         <div className="order-number-section">
           <span className="order-number-label">Order Number</span>
-          <span className="order-number">{orderNumber}</span>
+          <div className="order-number-container">
+            <span className="order-number">{orderNumber}</span>
+            <button 
+              className={`copy-button ${copied ? 'copied' : ''}`}
+              onClick={handleCopyOrderNumber}
+              aria-label="Copy order number"
+            >
+              {copied ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                </svg>
+              )}
+              <span>{copied ? 'Copied!' : 'Copy'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Order Status */}
@@ -107,15 +163,30 @@ const OrderConfirmation = () => {
                   <span className="item-quantity">x{item.quantity}</span>
                 </div>
                 <span className="item-price">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  {((item.price || 0) * (item.quantity || 0)).toFixed(2)} EGP
                 </span>
               </div>
             ))}
           </div>
 
+          <div className="order-fees">
+            <div className="fee-row">
+              <span>Subtotal</span>
+              <span>{subtotal.toFixed(2)} EGP</span>
+            </div>
+            <div className="fee-row">
+              <span>Delivery Fee</span>
+              <span>{DELIVERY_FEE.toFixed(2)} EGP</span>
+            </div>
+            <div className="fee-row">
+              <span>Service Fee</span>
+              <span>{SERVICE_FEE.toFixed(2)} EGP</span>
+            </div>
+          </div>
+
           <div className="order-total">
             <span>Total</span>
-            <span className="total-amount">${totalAmount.toFixed(2)}</span>
+            <span className="total-amount">{totalAmount.toFixed(2)} EGP</span>
           </div>
         </div>
 
