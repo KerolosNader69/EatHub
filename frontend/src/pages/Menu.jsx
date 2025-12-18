@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getMenuItems } from '../services/menuService';
 import MenuListCard from '../components/MenuListCard';
 import MenuItemDetail from '../components/MenuItemDetail';
@@ -28,6 +28,7 @@ const Menu = () => {
   const { addItem } = useCart();
   const { category } = useParams(); // Get category from URL
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Determine if we're in a category-specific view
   const isInCategoryView = Boolean(category);
@@ -36,6 +37,15 @@ const Menu = () => {
   useEffect(() => {
     fetchMenuItems();
   }, [category]); // Re-fetch when category changes
+
+  // Handle opening item from navigation state (e.g., from promo banner)
+  useEffect(() => {
+    if (location.state?.openItem) {
+      setSelectedItem(location.state.openItem);
+      // Clear the state to prevent reopening on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const fetchMenuItems = async () => {
     try {

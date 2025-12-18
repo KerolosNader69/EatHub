@@ -8,26 +8,39 @@ const PromoBanner = ({ announcement }) => {
   if (!announcement) return null;
 
   const handleClick = () => {
-    navigate(`/menu/item/${announcement.id}`);
+    // Navigate to the menu page with the item's category, passing the item to open
+    const category = announcement.category || 'menu';
+    navigate(`/menu/${category}`, { state: { openItem: announcement } });
   };
 
+  // Calculate a fake discount price (20% off) for display
+  const originalPrice = announcement.price;
+  const discountedPrice = originalPrice * 0.8;
+
   return (
-    <div className="promo-banner" onClick={handleClick} role="button" tabIndex={0}>
+    <div 
+      className="promo-banner" 
+      onClick={handleClick} 
+      role="button" 
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+    >
       <div className="promo-banner-image">
         <OptimizedImage 
-          src={announcement.announcement_image || announcement.image} 
-          alt={announcement.announcement_title || announcement.name}
+          src={announcement.image} 
+          alt={announcement.name}
         />
         <div className="promo-banner-overlay" />
       </div>
       <div className="promo-banner-content">
-        <div className="promo-badge">🔥 Special Offer</div>
-        <h2 className="promo-title">{announcement.announcement_title || announcement.name}</h2>
-        <p className="promo-subtitle">{announcement.announcement_subtitle || announcement.description}</p>
+        <div className="promo-badge">🔥 SPECIAL OFFER</div>
+        <h2 className="promo-title">{announcement.name}</h2>
+        <p className="promo-subtitle">{announcement.description}</p>
         <div className="promo-footer">
-          <span className="promo-price">
-            {(announcement.announcement_price || announcement.price).toFixed(2)} EGP
-          </span>
+          <div className="promo-prices">
+            <span className="promo-price-original">{originalPrice.toFixed(2)} EGP</span>
+            <span className="promo-price">{discountedPrice.toFixed(2)} EGP</span>
+          </div>
           <button className="promo-cta" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
             Order Now
           </button>
