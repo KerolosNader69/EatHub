@@ -488,3 +488,22 @@
     height: 70px;
   }
 }
+
+
+/* Discount Price Styling */
+.cart-item-price-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cart-item-price-original {
+  font-size: 12px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.cart-item-price--sale {
+  color: #C41E3A;
+  font-weight: 600;
+}

@@ -119,7 +119,14 @@ const Cart = () => {
               
               <div className="cart-item-details">
                 <h3 className="cart-item-name">{item.name}</h3>
-                <p className="cart-item-price">{formatPrice(item.price)} each</p>
+                {item.originalPrice && item.discountPrice && item.discountPrice < item.originalPrice ? (
+                  <div className="cart-item-price-container">
+                    <span className="cart-item-price-original">{formatPrice(item.originalPrice)}</span>
+                    <span className="cart-item-price cart-item-price--sale">{formatPrice(item.price)} each</span>
+                  </div>
+                ) : (
+                  <p className="cart-item-price">{formatPrice(item.price)} each</p>
+                )}
               </div>
 
               <div className="cart-item-controls">

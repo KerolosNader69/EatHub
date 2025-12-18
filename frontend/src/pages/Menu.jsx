@@ -88,10 +88,17 @@ const Menu = () => {
     : menuItems; // Show all items on main menu page
 
   const handleAddToCart = (item, quantity = 1) => {
+    // Use discount price if available
+    const effectivePrice = item.discount_price && item.discount_price < item.price 
+      ? item.discount_price 
+      : item.price;
+    
     addItem({
       id: item.id,
       name: item.name,
-      price: item.price,
+      price: effectivePrice,
+      originalPrice: item.price,
+      discountPrice: item.discount_price,
       image: item.image,
       quantity
     });

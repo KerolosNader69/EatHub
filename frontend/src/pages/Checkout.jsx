@@ -184,9 +184,22 @@ const Checkout = () => {
                     <span className="summary-item-name">{item.name}</span>
                     <span className="summary-item-quantity">x{item.quantity}</span>
                   </div>
-                  <span className="summary-item-price">
-                    {formatPrice(item.price * item.quantity)}
-                  </span>
+                  <div className="summary-item-price-container">
+                    {item.originalPrice && item.discountPrice && item.discountPrice < item.originalPrice ? (
+                      <>
+                        <span className="summary-item-price-original">
+                          {formatPrice(item.originalPrice * item.quantity)}
+                        </span>
+                        <span className="summary-item-price summary-item-price--sale">
+                          {formatPrice(item.price * item.quantity)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="summary-item-price">
+                        {formatPrice(item.price * item.quantity)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
