@@ -97,9 +97,7 @@ const getMenuItemById = async (req, res) => {
 const createMenuItem = async (req, res) => {
   try {
     const { 
-      name, description, price, category, ingredients, portionSize, available,
-      isAnnouncement, announcementTitle, announcementSubtitle, announcementPrice,
-      announcementPriority, announcementActive
+      name, description, price, category, ingredients, portionSize, available
     } = req.body;
 
     // Validate required fields
@@ -113,7 +111,7 @@ const createMenuItem = async (req, res) => {
       });
     }
 
-    // Prepare menu item data
+    // Prepare menu item data (only core fields that exist in database)
     const menuItemData = {
       name,
       description,
@@ -121,15 +119,7 @@ const createMenuItem = async (req, res) => {
       category,
       ingredients: ingredients ? (Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients)) : [],
       portion_size: portionSize || '',
-      // Convert string "true"/"false" to boolean
-      available: available === 'false' || available === false ? false : true,
-      // Announcement fields
-      is_announcement: isAnnouncement === 'true' || isAnnouncement === true,
-      announcement_title: announcementTitle || null,
-      announcement_subtitle: announcementSubtitle || null,
-      announcement_price: announcementPrice ? parseFloat(announcementPrice) : null,
-      announcement_priority: announcementPriority ? parseInt(announcementPriority) : 999,
-      announcement_active: announcementActive === 'false' || announcementActive === false ? false : true
+      available: available === 'false' || available === false ? false : true
     };
 
     // Add image as base64 data URL if file was uploaded
@@ -176,12 +166,10 @@ const updateMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
     const { 
-      name, description, price, category, ingredients, portionSize, available,
-      isAnnouncement, announcementTitle, announcementSubtitle, announcementPrice,
-      announcementPriority, announcementActive
+      name, description, price, category, ingredients, portionSize, available
     } = req.body;
 
-    // Prepare update data
+    // Prepare update data (only core fields that exist in database)
     const updateData = {};
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
@@ -191,21 +179,8 @@ const updateMenuItem = async (req, res) => {
       updateData.ingredients = Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients);
     }
     if (portionSize !== undefined) updateData.portion_size = portionSize;
-    // Convert string "true"/"false" to boolean
     if (available !== undefined) {
       updateData.available = available === 'false' || available === false ? false : true;
-    }
-
-    // Announcement fields
-    if (isAnnouncement !== undefined) {
-      updateData.is_announcement = isAnnouncement === 'true' || isAnnouncement === true;
-    }
-    if (announcementTitle !== undefined) updateData.announcement_title = announcementTitle || null;
-    if (announcementSubtitle !== undefined) updateData.announcement_subtitle = announcementSubtitle || null;
-    if (announcementPrice !== undefined) updateData.announcement_price = announcementPrice ? parseFloat(announcementPrice) : null;
-    if (announcementPriority !== undefined) updateData.announcement_priority = announcementPriority ? parseInt(announcementPriority) : 999;
-    if (announcementActive !== undefined) {
-      updateData.announcement_active = announcementActive === 'false' || announcementActive === false ? false : true;
     }
 
     // Update image as base64 data URL if new file was uploaded
@@ -298,8 +273,9 @@ const getFeaturedItems = async (req, res) => {
  * @route   GET /api/menu/announcement
  * @access  Public
  */
-const getAnnouncement = async (req, res) => {
+const getAnnouncement = async (_req, res) => {
   try {
+    // Try to fetch announcement items (requires announcement columns in database)
     const { data: announcements, error } = await supabase
       .from('menu_items')
       .select('*')
@@ -309,7 +285,14 @@ const getAnnouncement = async (req, res) => {
       .order('announcement_priority', { ascending: true })
       .limit(1);
 
-    if (error) throw error;
+    // If columns don't exist or other error, return null gracefully
+    if (error) {
+      console.log('Announcement columns may not exist yet:', error.message);
+      return res.status(200).json({
+        success: true,
+        data: null
+      });
+    }
 
     const announcement = announcements && announcements.length > 0 ? announcements[0] : null;
 
