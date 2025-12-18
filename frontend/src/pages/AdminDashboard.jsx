@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminMenuManagement from '../components/AdminMenuManagement';
 import AdminOrderManagement from '../components/AdminOrderManagement';
+import AdminFeedbackManagement from '../components/AdminFeedbackManagement';
+import AdminVoucherManagement from '../components/AdminVoucherManagement';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -61,11 +63,25 @@ const AdminDashboard = () => {
           >
             Order Management
           </button>
+          <button
+            className={`tab-button ${activeTab === 'feedback' ? 'active' : ''}`}
+            onClick={() => setActiveTab('feedback')}
+          >
+            Customer Feedback
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'vouchers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('vouchers')}
+          >
+            Voucher Management
+          </button>
         </nav>
 
         <div className="admin-panel">
           {activeTab === 'menu' && <AdminMenuManagement />}
           {activeTab === 'orders' && <AdminOrderManagement />}
+          {activeTab === 'feedback' && <AdminFeedbackManagement />}
+          {activeTab === 'vouchers' && <AdminVoucherManagement />}
         </div>
       </div>
     </div>

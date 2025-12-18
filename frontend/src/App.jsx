@@ -1,9 +1,11 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import IntroSequence from './components/IntroSequence';
 import Navigation from './components/Navigation';
+import BottomCartBar from './components/BottomCartBar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Loading from './components/Loading';
 import PageViewTracker from './components/PageViewTracker';
@@ -12,12 +14,20 @@ import errorTracker from './utils/errorTracking';
 import './App.css';
 
 // Lazy load route components for code splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
 const Menu = lazy(() => import('./pages/Menu'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'));
 const OrderStatus = lazy(() => import('./pages/OrderStatus'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+
+// Lazy load user auth components
+const UserSignup = lazy(() => import('./pages/UserSignup'));
+const UserLogin = lazy(() => import('./pages/UserLogin'));
+const UserSettings = lazy(() => import('./pages/UserSettings'));
+const TrackOrder = lazy(() => import('./pages/TrackOrder'));
+const Feedback = lazy(() => import('./pages/Feedback'));
 
 // Lazy load admin components (separate bundle)
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
@@ -53,7 +63,9 @@ function App() {
     return (
       <ErrorBoundary>
         <AuthProvider>
-          <IntroSequence onComplete={handleIntroComplete} />
+          <CartProvider>
+            <IntroSequence onComplete={handleIntroComplete} />
+          </CartProvider>
         </AuthProvider>
       </ErrorBoundary>
     );
@@ -62,13 +74,20 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router>
-          <PageViewTracker />
-          <Suspense fallback={<Loading />}>
-            <Routes>
+        <CartProvider>
+          <Router>
+            <PageViewTracker />
+            <Suspense fallback={<Loading />}>
+              <Routes>
               {/* Customer routes with navigation */}
-              <Route path="/" element={<Navigate to="/menu" replace />} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/menu" element={
+                <div className="app">
+                  <Navigation />
+                  <Menu />
+                </div>
+              } />
+              <Route path="/menu/:category" element={
                 <div className="app">
                   <Navigation />
                   <Menu />
@@ -99,6 +118,17 @@ function App() {
                 </div>
               } />
               
+              {/* User authentication routes */}
+              <Route path="/user/signup" element={<UserSignup />} />
+              <Route path="/user/login" element={<UserLogin />} />
+              <Route path="/user/settings" element={<UserSettings />} />
+              
+              {/* Track Order route */}
+              <Route path="/track-order" element={<TrackOrder />} />
+              
+              {/* Feedback route */}
+              <Route path="/feedback" element={<Feedback />} />
+              
               {/* Admin routes without customer navigation */}
               <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
               <Route path="/admin/login" element={<AdminLogin />} />
@@ -111,8 +141,10 @@ function App() {
               {/* 404 Not Found - catch all route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <BottomCartBar />
           </Suspense>
         </Router>
+        </CartProvider>
       </AuthProvider>
     </ErrorBoundary>
   );

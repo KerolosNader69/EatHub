@@ -8,7 +8,7 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
     name: '',
     description: '',
     price: '',
-    category: 'appetizers',
+    category: 'chicken_burgers',
     ingredients: '',
     portionSize: '',
     available: true
@@ -26,7 +26,7 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
         name: item.name || '',
         description: item.description || '',
         price: item.price || '',
-        category: item.category || 'appetizers',
+        category: item.category || 'chicken_burgers',
         ingredients: Array.isArray(item.ingredients) ? item.ingredients.join(', ') : '',
         portionSize: item.portionSize || '',
         available: item.available !== undefined ? item.available : true
@@ -134,7 +134,8 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
       submitData.append('description', formData.description.trim());
       submitData.append('price', parseFloat(formData.price));
       submitData.append('category', formData.category);
-      submitData.append('available', formData.available);
+      // Ensure boolean is sent as string for FormData
+      submitData.append('available', formData.available ? 'true' : 'false');
       
       if (formData.ingredients.trim()) {
         const ingredientsArray = formData.ingredients
@@ -237,10 +238,12 @@ const MenuItemForm = ({ item, onSubmit, onClose }) => {
                 className={errors.category ? 'error' : ''}
                 disabled={isSubmitting}
               >
-                <option value="appetizers">Appetizers</option>
-                <option value="main_courses">Main Courses</option>
-                <option value="desserts">Desserts</option>
-                <option value="beverages">Beverages</option>
+                <option value="chicken_burgers">Chicken Burgers</option>
+                <option value="beef_burgers">Beef Burgers</option>
+                <option value="box_deals">Box Deals</option>
+                <option value="drinks">Drinks</option>
+                <option value="potatoes">Potatoes</option>
+                <option value="deals_night">Deals Night</option>
               </select>
               {errors.category && <span className="field-error">{errors.category}</span>}
             </div>

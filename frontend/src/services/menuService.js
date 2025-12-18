@@ -1,6 +1,15 @@
-import api from './api';
+import axios from 'axios';
 import { withRetry } from '../utils/retryRequest';
 import { withCache, CACHE_KEYS, CACHE_TTL, invalidateCachePattern } from '../utils/cache';
+
+// Create a public API instance without auth interceptors for menu requests
+const publicApi = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 /**
  * Menu Service
@@ -13,7 +22,8 @@ import { withCache, CACHE_KEYS, CACHE_TTL, invalidateCachePattern } from '../uti
  */
 const getMenuItemsBase = async () => {
   try {
-    const response = await api.get('/menu');
+    // Use public API instance to ensure no auth headers are sent
+    const response = await publicApi.get('/menu');
     return response.data.data || response.data;
   } catch (error) {
     console.error('Error fetching menu items:', error);
@@ -28,7 +38,8 @@ const getMenuItemsBase = async () => {
  */
 const getMenuItemBase = async (id) => {
   try {
-    const response = await api.get(`/menu/${id}`);
+    // Use public API instance for individual menu items too
+    const response = await publicApi.get(`/menu/${id}`);
     return response.data.data || response.data;
   } catch (error) {
     console.error(`Error fetching menu item ${id}:`, error);
@@ -41,7 +52,8 @@ const getMenuItemBase = async (id) => {
  * @param {boolean} forceRefresh - Skip cache and fetch fresh data
  * @returns {Promise<Array>} Array of menu items
  */
-export const getMenuItems = async (forceRefresh = false) => {
+export const getMenuItems = async (forceRefresh = true) => {
+  // Always force refresh for now to avoid cache issues with availability changes
   if (forceRefresh) {
     invalidateCachePattern('menu_');
   }
@@ -72,6 +84,68 @@ export const getMenuItem = async (id, forceRefresh = false) => {
 };
 
 /**
+ * Get featured menu items (base function without caching)
+ * @returns {Promise<Array>} Array of featured menu items
+ */
+const getFeaturedItemsBase = async () => {
+  try {
+    const response = await publicApi.get('/menu/featured');
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error('Error fetching featured items:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all categories (base function without caching)
+ * @returns {Promise<Array>} Array of categories
+ */
+const getCategoriesBase = async () => {
+  try {
+    const response = await publicApi.get('/categories');
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get featured menu items with caching and retry logic
+ * @param {boolean} forceRefresh - Skip cache and fetch fresh data
+ * @returns {Promise<Array>} Array of featured menu items
+ */
+export const getFeaturedItems = async (forceRefresh = false) => {
+  if (forceRefresh) {
+    invalidateCachePattern('featured_items');
+  }
+  
+  return withCache(
+    CACHE_KEYS.FEATURED_ITEMS,
+    () => withRetry(getFeaturedItemsBase, { maxRetries: 2 })(),
+    CACHE_TTL.FEATURED_ITEMS
+  );
+};
+
+/**
+ * Get all categories with caching and retry logic
+ * @param {boolean} forceRefresh - Skip cache and fetch fresh data
+ * @returns {Promise<Array>} Array of categories
+ */
+export const getCategories = async (forceRefresh = false) => {
+  if (forceRefresh) {
+    invalidateCachePattern('categories');
+  }
+  
+  return withCache(
+    CACHE_KEYS.CATEGORIES,
+    () => withRetry(getCategoriesBase, { maxRetries: 2 })(),
+    CACHE_TTL.CATEGORIES
+  );
+};
+
+/**
  * Invalidate menu cache (call after menu updates)
  */
 export const invalidateMenuCache = () => {
@@ -80,7 +154,9 @@ export const invalidateMenuCache = () => {
 
 const menuService = {
   getMenuItems,
-  getMenuItem
+  getMenuItem,
+  getFeaturedItems,
+  getCategories
 };
 
 export default menuService;

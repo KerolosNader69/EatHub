@@ -1,13 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../services/orderService';
 import ErrorMessage, { InlineError } from '../components/ErrorMessage';
+import AuthModal from '../components/AuthModal';
 import './Checkout.css';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
+  const { isAuthenticated, admin: user, user: authUser } = useAuth();
+  
+  // Constants for fees (same as Cart page)
+  const DELIVERY_FEE = 20;
+  const SERVICE_FEE = 10;
+  
+  // Calculate total with fees
+  const totalAmount = totalPrice + DELIVERY_FEE + SERVICE_FEE;
+  
+  // Format price in EGP
+  const formatPrice = (price) => {
+    return `${price.toFixed(2)} EGP`;
+  };
   
   const [formData, setFormData] = useState({
     name: '',
@@ -19,12 +34,43 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Redirect if cart is empty
   if (items.length === 0) {
     navigate('/cart');
     return null;
   }
+
+  // Check authentication and show modal if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    }
+  }, [isAuthenticated]);
+
+  // Pre-fill form with user data if authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.fullName || '',
+        phone: user.phone || '',
+        address: user.address || ''
+      }));
+    }
+  }, [isAuthenticated, user]);
+
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+  };
+
+  const handleAuthModalClose = () => {
+    // Don't allow closing if not authenticated
+    if (!isAuthenticated) {
+      navigate('/cart');
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,15 +138,17 @@ const Checkout = () => {
         specialInstructions: formData.specialInstructions.trim()
       };
       
-      // Create order
-      const response = await createOrder(orderData);
+      // Create order with user ID for rewards
+      const userId = authUser?.id || user?.id || null;
+      const response = await createOrder(orderData, userId);
       
       // Navigate to confirmation page with order data
       navigate('/order-confirmation', {
         state: {
           orderNumber: response.orderNumber,
           estimatedDelivery: response.estimatedDelivery,
-          order: response.order || response
+          order: response.order || response,
+          rewards: response.rewards // Pass rewards info to confirmation page
         }
       });
       
@@ -113,8 +161,15 @@ const Checkout = () => {
   };
 
   return (
-    <div className="checkout-page">
-      <div className="checkout-container">
+    <>
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={handleAuthModalClose}
+        onSuccess={handleAuthSuccess}
+      />
+      
+      <div className="checkout-page">
+        <div className="checkout-container">
         <h1>Checkout</h1>
         
         <div className="checkout-content">
@@ -129,14 +184,30 @@ const Checkout = () => {
                     <span className="summary-item-quantity">x{item.quantity}</span>
                   </div>
                   <span className="summary-item-price">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
             </div>
+            
+            <div className="summary-fees">
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <span>{formatPrice(totalPrice)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Delivery Fee</span>
+                <span>{formatPrice(DELIVERY_FEE)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Service Fee</span>
+                <span>{formatPrice(SERVICE_FEE)}</span>
+              </div>
+            </div>
+            
             <div className="summary-total">
               <span>Total</span>
-              <span className="total-amount">${totalPrice.toFixed(2)}</span>
+              <span className="total-amount">{formatPrice(totalAmount)}</span>
             </div>
           </div>
           
@@ -229,6 +300,7 @@ const Checkout = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

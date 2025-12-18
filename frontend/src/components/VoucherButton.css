@@ -1,0 +1,232 @@
+.voucher-button {
+  /* Base button styling */
+  font-family: var(--font-family);
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  padding: 16px 32px;
+  border-radius: var(--radius-lg);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  
+  /* Primary button styling with red background */
+  background-color: var(--color-red);
+  color: var(--color-white);
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  height: 60px;
+  
+  /* Touch-friendly sizing */
+  min-height: 44px;
+  
+  /* Shadow for depth */
+  box-shadow: var(--shadow-sm);
+}
+
+.voucher-button__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
+.voucher-button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.voucher-button__text {
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.5px;
+}
+
+.voucher-button__badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background-color: var(--color-white);
+  color: var(--color-red);
+  font-size: 12px;
+  font-weight: var(--font-weight-bold);
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover effects */
+.voucher-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-red), #a01729);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Active/pressed state */
+.voucher-button--pressed {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Disabled state */
+.voucher-button--disabled {
+  background-color: var(--color-gray-border);
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.voucher-button--disabled:hover {
+  background-color: var(--color-gray-border);
+  transform: none;
+  box-shadow: none;
+}
+
+.voucher-button--disabled .voucher-button__badge {
+  display: none;
+}
+
+/* Focus state for accessibility */
+.voucher-button:focus {
+  outline: 3px solid var(--color-white);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-red), 0 0 0 4px var(--color-white), var(--shadow-md);
+}
+
+.voucher-button:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.voucher-button:focus-visible {
+  outline: 3px solid var(--color-white);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-red), 0 0 0 4px var(--color-white), var(--shadow-md);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .voucher-button {
+    width: 100%;
+    min-width: unset;
+    padding: 18px 24px;
+    font-size: 16px;
+    /* Ensure minimum touch target */
+    min-height: 48px;
+  }
+  
+  .voucher-button__badge {
+    right: -8px;
+    top: -6px;
+  }
+}
+
+/* Small Mobile Styles (< 480px) */
+@media (max-width: 480px) {
+  .voucher-button {
+    padding: 16px 20px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+  
+  .voucher-button__icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Extra Small Mobile Styles (< 360px) */
+@media (max-width: 360px) {
+  .voucher-button {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .voucher-button {
+    border: 2px solid var(--color-white);
+  }
+  
+  .voucher-button--disabled {
+    border-color: #666666;
+  }
+}
+
+/* Success animation state */
+.voucher-button--success {
+  background-color: #28a745;
+  animation: successPulse 0.6s ease-out;
+}
+
+.voucher-button--success:hover {
+  background-color: #28a745;
+  transform: none;
+}
+
+.voucher-button__success-icon {
+  animation: checkmarkDraw 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    background-color: var(--color-red);
+    transform: scale(1);
+  }
+  50% {
+    background-color: #28a745;
+    transform: scale(1.05);
+  }
+  100% {
+    background-color: #28a745;
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmarkDraw {
+  0% {
+    stroke-dasharray: 0 100;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dasharray: 100 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .voucher-button {
+    transition: none;
+  }
+  
+  .voucher-button:hover:not(:disabled) {
+    transform: none;
+  }
+  
+  .voucher-button--pressed {
+    transform: none;
+  }
+  
+  .voucher-button--success {
+    animation: none;
+  }
+  
+  .voucher-button__success-icon {
+    animation: none;
+  }
+}

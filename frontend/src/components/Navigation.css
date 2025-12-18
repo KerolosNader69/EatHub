@@ -65,6 +65,58 @@
   color: #C41E3A;
 }
 
+.nav-link.active {
+  color: #C41E3A;
+  position: relative;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #C41E3A;
+  border-radius: 1px;
+}
+
+.home-link {
+  position: relative;
+}
+
+.home-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.menu-link {
+  position: relative;
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.feedback-link {
+  position: relative;
+}
+
+.feedback-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.track-order-link {
+  position: relative;
+}
+
+.track-icon {
+  width: 24px;
+  height: 24px;
+}
+
 .cart-link {
   position: relative;
 }
@@ -89,6 +141,34 @@
   align-items: center;
   justify-content: center;
   padding: 0 6px;
+  transition: all 0.2s ease;
+}
+
+/* De-emphasized cart when bottom bar is active */
+.cart-link--minimal {
+  opacity: 0.6;
+}
+
+.cart-badge--minimal {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  top: -6px;
+  right: -10px;
+}
+
+/* Hide header cart on mobile when bottom bar is active */
+@media (max-width: 768px) {
+  .cart-link--minimal {
+    opacity: 0.3;
+  }
+}
+
+/* Keep header cart visible on desktop */
+@media (min-width: 769px) {
+  .cart-link--minimal {
+    opacity: 1;
+  }
 }
 
 /* Mobile menu toggle button */
@@ -186,5 +266,118 @@
 
   .nav-links {
     gap: 24px;
+  }
+}
+
+/* Authentication Buttons Container */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Points Display */
+.points-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  color: #000;
+  font-size: 14px;
+}
+
+.points-icon {
+  font-size: 16px;
+}
+
+.points-count {
+  font-weight: 700;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Sign Up Button */
+.signup-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #FFFFFF;
+  border: 2px solid transparent;
+}
+
+.signup-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Login Button */
+.login-button {
+  background: transparent;
+  color: #FFFFFF;
+  border: 2px solid #667eea;
+}
+
+.login-button:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: #764ba2;
+  transform: translateY(-2px);
+}
+
+/* Settings Button */
+.settings-button {
+  background: transparent;
+  color: #FFFFFF;
+  border: 2px solid #888;
+}
+
+.settings-button:hover {
+  background: rgba(136, 136, 136, 0.1);
+  border-color: #aaa;
+  transform: translateY(-2px);
+}
+
+/* Sign Out Button */
+.signout-button {
+  background: transparent;
+  color: #FFFFFF;
+  border: 2px solid #dc3545;
+}
+
+.signout-button:hover {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: #c82333;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .auth-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .nav-button {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
   }
 }

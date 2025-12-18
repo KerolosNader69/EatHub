@@ -20,13 +20,13 @@ logger.info('Starting Eat Hub API server with Supabase', {
 const app = express();
 
 // Middleware
-// CORS configuration
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+// CORS configuration - Allow ALL origins (temporary for debugging)
+app.use(cors({
+  origin: '*',
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Body parser middleware for JSON
 app.use(express.json());
@@ -64,9 +64,25 @@ app.use('/api/auth', authRoutes);
 const menuRoutes = require('./routes/menu');
 app.use('/api/menu', menuRoutes);
 
+// Categories routes
+const categoriesRoutes = require('./routes/categories');
+app.use('/api/categories', categoriesRoutes);
+
+// Vouchers routes
+const vouchersRoutes = require('./routes/vouchers');
+app.use('/api/vouchers', vouchersRoutes);
+
+// Rewards routes
+const rewardsRoutes = require('./routes/rewards');
+app.use('/api/rewards', rewardsRoutes);
+
 // Order routes (will use Supabase)
 const orderRoutes = require('./routes/orders');
 app.use('/api/orders', orderRoutes);
+
+// Feedback routes
+const feedbackRoutes = require('./routes/feedback');
+app.use('/api/feedback', feedbackRoutes);
 
 // Track requests for monitoring
 app.use((req, res, next) => {

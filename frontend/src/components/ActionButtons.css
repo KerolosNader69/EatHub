@@ -1,0 +1,139 @@
+.action-buttons {
+  width: 100%;
+  padding: var(--spacing-lg) 0;
+}
+
+.action-buttons__container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* Desktop layout - side by side */
+@media (min-width: 769px) {
+  .action-buttons__container {
+    flex-direction: row;
+    gap: var(--spacing-xl);
+  }
+  
+  .action-buttons__voucher,
+  .action-buttons__rewards {
+    flex: 1;
+    max-width: 280px;
+  }
+}
+
+/* Mobile layout - stacked vertically */
+@media (max-width: 768px) {
+  .action-buttons {
+    padding: var(--spacing-md) 0;
+  }
+  
+  .action-buttons__container {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-md);
+  }
+  
+  .action-buttons__voucher,
+  .action-buttons__rewards {
+    width: 100%;
+    max-width: 400px;
+    /* Ensure minimum touch target height */
+    min-height: 44px;
+  }
+}
+
+/* Small Mobile Styles (< 480px) */
+@media (max-width: 480px) {
+  .action-buttons__container {
+    padding: 0 var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+  
+  .action-buttons__voucher,
+  .action-buttons__rewards {
+    max-width: none;
+  }
+}
+
+/* Extra Small Mobile Styles (< 360px) */
+@media (max-width: 360px) {
+  .action-buttons__container {
+    padding: 0 var(--spacing-xs);
+  }
+}
+
+/* Tablet breakpoint adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .action-buttons__container {
+    gap: var(--spacing-lg);
+    max-width: 500px;
+  }
+  
+  .action-buttons__voucher,
+  .action-buttons__rewards {
+    max-width: 220px;
+  }
+}
+
+/* Large desktop adjustments */
+@media (min-width: 1200px) {
+  .action-buttons__container {
+    max-width: 700px;
+    gap: var(--spacing-xxl);
+  }
+  
+  .action-buttons__voucher,
+  .action-buttons__rewards {
+    max-width: 300px;
+  }
+}
+
+/* Accessibility improvements */
+.action-buttons__container:focus-within {
+  outline: none;
+}
+
+/* Animation for container appearance */
+.action-buttons {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .action-buttons {
+    animation: none;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .action-buttons {
+    border-top: 1px solid var(--color-gray-border);
+    border-bottom: 1px solid var(--color-gray-border);
+    background-color: rgba(245, 245, 245, 0.5);
+  }
+}
+
+/* Print styles */
+@media print {
+  .action-buttons {
+    display: none;
+  }
+}

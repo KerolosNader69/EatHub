@@ -7,6 +7,10 @@ const Cart = () => {
   const navigate = useNavigate();
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
 
+  // Constants for fees
+  const DELIVERY_FEE = 20;
+  const SERVICE_FEE = 10;
+
   const handleQuantityChange = (itemId, currentQuantity, change) => {
     const newQuantity = currentQuantity + change;
     if (newQuantity > 0) {
@@ -22,15 +26,29 @@ const Cart = () => {
     navigate('/checkout');
   };
 
-  const formatPrice = (price) => {
-    return `$${price.toFixed(2)}`;
+  const handleBack = () => {
+    navigate(-1); // Go back to previous page
   };
+
+  const formatPrice = (price) => {
+    return `${price.toFixed(2)} EGP`;
+  };
+
+  // Calculate total amount
+  const totalAmount = totalPrice + DELIVERY_FEE + SERVICE_FEE;
 
   if (items.length === 0) {
     return (
       <div className="cart-page">
         <div className="cart-container">
-          <h1 className="cart-title">Your Cart</h1>
+          <div className="cart-header">
+            <button className="back-button" onClick={handleBack} aria-label="Go back">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <h1 className="cart-title">Your Cart</h1>
+          </div>
           <div className="empty-cart">
             <svg 
               className="empty-cart-icon" 
@@ -62,7 +80,14 @@ const Cart = () => {
   return (
     <div className="cart-page">
       <div className="cart-container">
-        <h1 className="cart-title">Your Cart</h1>
+        <div className="cart-header">
+          <button className="back-button" onClick={handleBack} aria-label="Go back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <h1 className="cart-title">Your Cart</h1>
+        </div>
         
         <div className="cart-items">
           {items.map((item) => (
@@ -143,9 +168,28 @@ const Cart = () => {
         </div>
 
         <div className="cart-summary">
-          <div className="cart-total">
-            <span className="total-label">Subtotal:</span>
-            <span className="total-amount">{formatPrice(totalPrice)}</span>
+          <h2 className="payment-summary-title">Payment Summary</h2>
+          
+          <div className="summary-row">
+            <span className="summary-label">Subtotal:</span>
+            <span className="summary-value">{formatPrice(totalPrice)}</span>
+          </div>
+          
+          <div className="summary-row">
+            <span className="summary-label">Delivery Fee:</span>
+            <span className="summary-value">{formatPrice(DELIVERY_FEE)}</span>
+          </div>
+          
+          <div className="summary-row">
+            <span className="summary-label">Service Fee:</span>
+            <span className="summary-value">{formatPrice(SERVICE_FEE)}</span>
+          </div>
+          
+          <div className="summary-divider"></div>
+          
+          <div className="summary-row total-row">
+            <span className="summary-label">TOTAL AMOUNT:</span>
+            <span className="summary-value total-amount">{formatPrice(totalAmount)}</span>
           </div>
           
           <button 

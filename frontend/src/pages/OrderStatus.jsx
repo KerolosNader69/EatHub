@@ -221,21 +221,21 @@ const OrderStatus = () => {
             <div className="order-items-section">
               <h3>Order Items</h3>
               <div className="order-items-list">
-                {order.items.map((item, index) => (
+                {(order.items || []).map((item, index) => (
                   <div key={index} className="order-item">
                     <div className="item-details">
                       <span className="item-name">{item.name}</span>
                       <span className="item-quantity">Qty: {item.quantity}</span>
                     </div>
                     <span className="item-price">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {(item.price * item.quantity).toFixed(2)} EGP
                     </span>
                   </div>
                 ))}
               </div>
               <div className="order-total">
                 <span>Total</span>
-                <span className="total-amount">${order.totalAmount.toFixed(2)}</span>
+                <span className="total-amount">{(order.totalAmount || 0).toFixed(2)} EGP</span>
               </div>
             </div>
 

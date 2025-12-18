@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Modal from './Modal';
 import OptimizedImage from './OptimizedImage';
 import './MenuItemDetail.css';
 
@@ -12,6 +11,14 @@ const MenuItemDetail = ({ item, onClose, onAddToCart }) => {
     setQuantity(1);
     setImageError(false);
   }, [item]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   const handleImageError = () => {
     setImageError(true);
@@ -32,48 +39,41 @@ const MenuItemDetail = ({ item, onClose, onAddToCart }) => {
 
   const totalPrice = (item.price * quantity).toFixed(2);
 
-  return (
-    <Modal onClose={onClose}>
-      <div className="menu-item-detail">
-        <button className="close-button" onClick={onClose} aria-label="Close">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+  // Parse ingredients if it's a string
+  const ingredientsList = typeof item.ingredients === 'string' 
+    ? item.ingredients.split(',').map(i => i.trim())
+    : Array.isArray(item.ingredients) 
+    ? item.ingredients 
+    : [];
 
-        <div className="menu-item-detail-content">
-          <div className="menu-item-detail-image-container">
+  return (
+    <div className="product-detail-overlay" onClick={onClose}>
+      <div className="product-detail" onClick={(e) => e.stopPropagation()}>
+        {/* Header with Back Button */}
+        <div className="product-detail__header">
+          <button className="product-detail__back" onClick={onClose} aria-label="Go back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="product-detail__content">
+          {/* Product Image */}
+          <div className="product-detail__image-wrapper">
             {!imageError && item.image ? (
               <OptimizedImage
                 src={item.image}
                 alt={item.name}
-                className="menu-item-detail-image"
+                className="product-detail__image"
                 lazy={false}
                 onError={handleImageError}
               />
             ) : (
-              <div className="menu-item-detail-image-placeholder">
-                <svg
-                  width="80"
-                  height="80"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <div className="product-detail__image-placeholder">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
                 </svg>
@@ -81,66 +81,70 @@ const MenuItemDetail = ({ item, onClose, onAddToCart }) => {
             )}
           </div>
 
-          <div className="menu-item-detail-info">
-            <h2 className="menu-item-detail-name">{item.name}</h2>
-            <p className="menu-item-detail-price">${item.price.toFixed(2)}</p>
+          {/* Product Info */}
+          <div className="product-detail__info">
+            <h1 className="product-detail__name">{item.name}</h1>
+            <p className="product-detail__price">{item.price.toFixed(2)} EGP</p>
 
-            <div className="menu-item-detail-section">
-              <h3>Description</h3>
-              <p>{item.description}</p>
-            </div>
+            {item.description && (
+              <p className="product-detail__description">{item.description}</p>
+            )}
 
-            {item.ingredients && item.ingredients.length > 0 && (
-              <div className="menu-item-detail-section">
-                <h3>Ingredients</h3>
-                <ul className="ingredients-list">
-                  {item.ingredients.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
-                  ))}
-                </ul>
+            {/* Weight/Grams */}
+            {(item.grams || item.weight || item.portionSize) && (
+              <div className="product-detail__meta">
+                <span className="product-detail__meta-label">Weight:</span>
+                <span className="product-detail__meta-value">
+                  {item.grams ? `${item.grams}g` : item.weight || item.portionSize}
+                </span>
               </div>
             )}
 
-            {item.portionSize && (
-              <div className="menu-item-detail-section">
-                <h3>Portion Size</h3>
-                <p>{item.portionSize}</p>
+            {/* Ingredients */}
+            {ingredientsList.length > 0 && (
+              <div className="product-detail__section">
+                <h3 className="product-detail__section-title">Ingredients</h3>
+                <p className="product-detail__ingredients">
+                  {ingredientsList.join(', ')}
+                </p>
               </div>
             )}
 
-            <div className="menu-item-detail-actions">
-              <div className="quantity-selector">
-                <button
-                  className="quantity-button"
-                  onClick={handleDecrement}
-                  aria-label="Decrease quantity"
-                >
-                  −
-                </button>
-                <span className="quantity-value">{quantity}</span>
-                <button
-                  className="quantity-button"
-                  onClick={handleIncrement}
-                  aria-label="Increase quantity"
-                >
-                  +
-                </button>
-              </div>
-
-              <button
-                className="add-to-cart-button-detail"
-                onClick={handleAddToCart}
-                disabled={!item.available}
-              >
-                {item.available
-                  ? `Add to Cart - $${totalPrice}`
-                  : 'Unavailable'}
-              </button>
-            </div>
+            {/* Spacer for sticky footer */}
+            <div className="product-detail__spacer"></div>
           </div>
         </div>
+
+        {/* Sticky Footer with Add to Cart */}
+        <div className="product-detail__footer">
+          <div className="product-detail__quantity">
+            <button
+              className="product-detail__qty-btn"
+              onClick={handleDecrement}
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+            <span className="product-detail__qty-value">{quantity}</span>
+            <button
+              className="product-detail__qty-btn"
+              onClick={handleIncrement}
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+
+          <button
+            className="product-detail__add-btn"
+            onClick={handleAddToCart}
+            disabled={!item.available}
+          >
+            {item.available ? `Add to Cart • ${totalPrice} EGP` : 'Unavailable'}
+          </button>
+        </div>
       </div>
-    </Modal>
+    </div>
   );
 };
 

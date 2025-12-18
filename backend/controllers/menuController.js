@@ -1,17 +1,26 @@
 const supabase = require('../config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 
 /**
- * @desc    Get all available menu items
+ * @desc    Get all menu items (or only available for public)
  * @route   GET /api/menu
- * @access  Public
+ * @access  Public (filtered) / Admin (all items)
  */
 const getMenuItems = async (req, res) => {
   try {
-    // Fetch only available menu items from Supabase
-    const { data: menuItems, error } = await supabase
+    // Check if request is from admin (has auth token)
+    const isAdmin = req.headers.authorization;
+    
+    let query = supabase
       .from('menu_items')
-      .select('*')
-      .eq('available', true)
+      .select('*');
+    
+    // If not admin, only show available items
+    if (!isAdmin) {
+      query = query.eq('available', true);
+    }
+    
+    const { data: menuItems, error } = await query
       .order('category', { ascending: true })
       .order('name', { ascending: true });
 
@@ -103,7 +112,8 @@ const createMenuItem = async (req, res) => {
       category,
       ingredients: ingredients ? (Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients)) : [],
       portion_size: portionSize || '',
-      available: available !== undefined ? available : true
+      // Convert string "true"/"false" to boolean
+      available: available === 'false' || available === false ? false : true
     };
 
     // Add image path if file was uploaded
@@ -157,7 +167,10 @@ const updateMenuItem = async (req, res) => {
       updateData.ingredients = Array.isArray(ingredients) ? ingredients : JSON.parse(ingredients);
     }
     if (portionSize !== undefined) updateData.portion_size = portionSize;
-    if (available !== undefined) updateData.available = available;
+    // Convert string "true"/"false" to boolean
+    if (available !== undefined) {
+      updateData.available = available === 'false' || available === false ? false : true;
+    }
 
     // Update image if new file was uploaded
     if (req.file) {
@@ -200,6 +213,49 @@ const updateMenuItem = async (req, res) => {
 };
 
 /**
+ * @desc    Get featured menu items
+ * @route   GET /api/menu/featured
+ * @access  Public
+ */
+const getFeaturedItems = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 6; // Default to 6 items
+
+    // Since we can't modify the database schema, we'll get the first few available items
+    // and treat them as featured items for demonstration purposes
+    const { data: menuItems, error } = await supabase
+      .from('menu_items')
+      .select('*')
+      .eq('available', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    // Add featured properties to the items
+    const featuredItems = (menuItems || []).map((item, index) => ({
+      ...item,
+      is_featured: true,
+      featured_order: index + 1
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: featuredItems
+    });
+  } catch (error) {
+    console.error('Error fetching featured items:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Failed to fetch featured items',
+        code: 'FETCH_ERROR'
+      }
+    });
+  }
+};
+
+/**
  * @desc    Delete menu item (Admin only)
  * @route   DELETE /api/menu/:id
  * @access  Private/Admin
@@ -207,14 +263,18 @@ const updateMenuItem = async (req, res) => {
 const deleteMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    console.log(`Attempting to delete menu item with ID: ${id}`);
 
-    // Delete menu item from Supabase
-    const { error } = await supabase
+    // First, check if the item exists
+    const { data: existingItem, error: checkError } = await supabaseAdmin
       .from('menu_items')
-      .delete()
-      .eq('id', id);
+      .select('id, name')
+      .eq('id', id)
+      .single();
 
-    if (error) {
+    if (checkError || !existingItem) {
+      console.log('Menu item not found:', checkError);
       return res.status(404).json({
         success: false,
         error: {
@@ -224,17 +284,72 @@ const deleteMenuItem = async (req, res) => {
       });
     }
 
+    console.log(`Found item to delete: ${existingItem.name}`);
+
+    // Check if the item is referenced in any orders
+    const { data: orderItems, error: orderCheckError } = await supabaseAdmin
+      .from('order_items')
+      .select('id')
+      .eq('menu_item_id', id)
+      .limit(1);
+
+    if (orderCheckError) {
+      console.error('Error checking order references:', orderCheckError);
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: 'Failed to check order references',
+          code: 'CHECK_ERROR'
+        }
+      });
+    }
+
+    if (orderItems && orderItems.length > 0) {
+      console.log(`Cannot delete item ${existingItem.name} - it has order references`);
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Cannot delete menu item because it is referenced in existing orders. Consider marking it as unavailable instead.',
+          code: 'REFERENCED_IN_ORDERS'
+        }
+      });
+    }
+
+    // Delete the item (safe to delete since no order references)
+    const { error: deleteError } = await supabaseAdmin
+      .from('menu_items')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('Delete operation failed:', deleteError);
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: 'Failed to delete menu item',
+          code: 'DELETE_ERROR',
+          details: deleteError.message
+        }
+      });
+    }
+
+    console.log(`Successfully deleted menu item: ${existingItem.name}`);
+
     res.status(200).json({
       success: true,
-      message: 'Menu item deleted successfully'
+      message: 'Menu item deleted successfully',
+      data: {
+        id: existingItem.id,
+        name: existingItem.name
+      }
     });
   } catch (error) {
-    console.error('Error deleting menu item:', error);
+    console.error('Unexpected error in deleteMenuItem:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Failed to delete menu item',
-        code: 'DELETE_ERROR'
+        message: 'Internal server error',
+        code: 'SERVER_ERROR'
       }
     });
   }
@@ -243,6 +358,7 @@ const deleteMenuItem = async (req, res) => {
 module.exports = {
   getMenuItems,
   getMenuItemById,
+  getFeaturedItems,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem

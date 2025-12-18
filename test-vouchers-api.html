@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Vouchers API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    button {
+      background: #e63946;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #d62828;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+    }
+    .error {
+      border-left-color: #dc3545;
+      background: #f8d7da;
+    }
+    .success {
+      border-left-color: #28a745;
+      background: #d4edda;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+    .info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .voucher-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .voucher-code {
+      font-weight: bold;
+      color: #e63946;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎫 Vouchers API Test</h1>
+    
+    <div class="info">
+      <strong>Test Environment:</strong><br>
+      <span id="apiUrl">Loading...</span>
+    </div>
+
+    <div>
+      <button onclick="testLocalAPI()">Test Local API (localhost:5000)</button>
+      <button onclick="testProductionAPI()">Test Production API (Vercel)</button>
+      <button onclick="clearCache()">Clear Browser Cache</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const LOCAL_API = 'http://localhost:5000/api';
+    const PRODUCTION_API = 'https://backend-ljhd8p024-kerolosnader69s-projects.vercel.app/api';
+    
+    let currentAPI = LOCAL_API;
+
+    document.getElementById('apiUrl').textContent = `Current: ${currentAPI}`;
+
+    async function testAPI(apiUrl) {
+      currentAPI = apiUrl;
+      document.getElementById('apiUrl').textContent = `Current: ${apiUrl}`;
+      
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '<div class="result">Loading...</div>';
+
+      try {
+        // Add timestamp to prevent caching
+        const timestamp = Date.now();
+        const response = await fetch(`${apiUrl}/vouchers/available?_t=${timestamp}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          const vouchers = data.data || data;
+          
+          if (vouchers.length === 0) {
+            resultDiv.innerHTML = `
+              <div class="result success">
+                <h3>✅ Success - No Vouchers</h3>
+                <p>The API returned successfully with 0 vouchers.</p>
+                <p><strong>Status:</strong> ${response.status}</p>
+                <p><strong>Cache Headers:</strong></p>
+                <pre>${JSON.stringify({
+                  'Cache-Control': response.headers.get('Cache-Control'),
+                  'Pragma': response.headers.get('Pragma'),
+                  'Expires': response.headers.get('Expires')
+                }, null, 2)}</pre>
+              </div>
+            `;
+          } else {
+            let vouchersHTML = vouchers.map(v => `
+              <div class="voucher-card">
+                <div class="voucher-code">${v.code}</div>
+                <div>${v.title}</div>
+                <div>Discount: ${v.discount_type === 'percentage' ? v.discount_value + '%' : '$' + v.discount_value}</div>
+                <div>Min Order: $${v.minimum_order || 0}</div>
+                <div>Expires: ${v.expiry_date ? new Date(v.expiry_date).toLocaleDateString() : 'Never'}</div>
+              </div>
+            `).join('');
+
+            resultDiv.innerHTML = `
+              <div class="result success">
+                <h3>✅ Success - ${vouchers.length} Voucher(s) Found</h3>
+                ${vouchersHTML}
+                <p><strong>Raw Response:</strong></p>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+              </div>
+            `;
+          }
+        } else {
+          resultDiv.innerHTML = `
+            <div class="result error">
+              <h3>❌ Error ${response.status}</h3>
+              <p>${data.error?.message || data.message || 'Unknown error'}</p>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <h3>❌ Network Error</h3>
+            <p>${error.message}</p>
+            <p>Make sure the API server is running and CORS is enabled.</p>
+          </div>
+        `;
+      }
+    }
+
+    function testLocalAPI() {
+      testAPI(LOCAL_API);
+    }
+
+    function testProductionAPI() {
+      testAPI(PRODUCTION_API);
+    }
+
+    function clearCache() {
+      // Clear localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('eathub_cache_')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = `
+        <div class="result success">
+          <h3>✅ Cache Cleared</h3>
+          <p>All EatHub cache has been cleared from localStorage.</p>
+          <p>Now do a hard refresh (Ctrl+Shift+R or Cmd+Shift+R) to clear browser cache.</p>
+        </div>
+      `;
+    }
+
+    // Auto-test on load
+    window.onload = () => {
+      testLocalAPI();
+    };
+  </script>
+</body>
+</html>

@@ -83,4 +83,52 @@ export const OrderListSkeleton = ({ count = 5 }) => (
   </div>
 );
 
+/**
+ * Skeleton for category cards
+ */
+export const CategoryCardSkeleton = () => (
+  <div className="category-card-skeleton">
+    <Skeleton className="skeleton-category-icon" width="60px" height="60px" />
+    <Skeleton width="70px" height="12px" className="skeleton-category-name" />
+  </div>
+);
+
+/**
+ * Horizontal scroll of category card skeletons
+ */
+export const CategoryGridSkeleton = ({ count = 8 }) => (
+  <>
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className="category-grid-item">
+        <CategoryCardSkeleton />
+      </div>
+    ))}
+  </>
+);
+
+/**
+ * Skeleton for featured item cards
+ */
+export const FeaturedItemSkeleton = () => (
+  <div className="featured-item-skeleton">
+    <Skeleton className="skeleton-featured-image" height="150px" />
+    <div className="skeleton-featured-content">
+      <Skeleton width="90%" height="16px" className="skeleton-featured-name" />
+      <Skeleton width="50%" height="18px" className="skeleton-featured-price" />
+      <Skeleton width="100%" height="36px" className="skeleton-featured-button" />
+    </div>
+  </div>
+);
+
+/**
+ * Grid of featured item skeletons
+ */
+export const FeaturedItemsGridSkeleton = ({ count = 4 }) => (
+  <div className="featured-items-grid-skeleton">
+    {Array.from({ length: count }).map((_, index) => (
+      <FeaturedItemSkeleton key={index} />
+    ))}
+  </div>
+);
+
 export default Skeleton;

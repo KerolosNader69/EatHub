@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getMenuItems,
   getMenuItemById,
+  getFeaturedItems,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem
@@ -12,6 +13,7 @@ const upload = require('../config/multer');
 
 // Public routes - customer-facing
 router.get('/', getMenuItems);
+router.get('/featured', getFeaturedItems);
 router.get('/:id', getMenuItemById);
 
 // Admin routes - protected

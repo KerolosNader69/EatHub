@@ -11,3 +11,8 @@ export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as ErrorMessage, InlineError } from './ErrorMessage';
 export { default as Skeleton, MenuItemSkeleton, MenuGridSkeleton, OrderCardSkeleton, OrderListSkeleton, TableRowSkeleton } from './SkeletonLoader';
 export { default as OptimizedImage } from './OptimizedImage';
+export { default as CategoryGrid } from './CategoryGrid';
+export { default as CategoryCard } from './CategoryCard';
+export { default as VoucherButton } from './VoucherButton';
+export { default as RewardsButton } from './RewardsButton';
+export { default as ActionButtons } from './ActionButtons';

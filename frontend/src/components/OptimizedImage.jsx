@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { trackImageLoad, trackLazyLoad } from '../utils/performanceMonitor';
 import './OptimizedImage.css';
 
 /**
@@ -26,7 +27,7 @@ const OptimizedImage = ({
 
   // Convert image URL to WebP version
   const getWebPUrl = (url) => {
-    if (!url || url.startsWith('data:')) return null;
+    if (!url || url.startsWith('data:') || url.endsWith('.svg')) return null;
     // If it's already a WebP, return as is
     if (url.endsWith('.webp')) return url;
     // Replace extension with .webp
@@ -45,6 +46,7 @@ const OptimizedImage = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsInView(true);
+            trackLazyLoad(`OptimizedImage: ${src}`);
             observer.disconnect();
           }
         });
@@ -63,6 +65,11 @@ const OptimizedImage = ({
 
   const handleLoad = (e) => {
     setIsLoaded(true);
+    
+    // Track image load performance
+    const loadTime = performance.now() - (e.target.dataset.startTime || 0);
+    trackImageLoad(src, loadTime);
+    
     if (onLoad) onLoad(e);
   };
 
@@ -125,6 +132,7 @@ const OptimizedImage = ({
         onLoad={handleLoad}
         onError={handleError}
         loading={lazy ? 'lazy' : 'eager'}
+        data-start-time={performance.now()}
         {...props}
       />
     </picture>

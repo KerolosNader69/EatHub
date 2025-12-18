@@ -172,6 +172,10 @@ export const CACHE_KEYS = {
   MENU_ITEMS: 'menu_items',
   MENU_ITEM: (id) => `menu_item_${id}`,
   ORDER: (orderNumber) => `order_${orderNumber}`,
+  FEATURED_ITEMS: 'featured_items',
+  CATEGORIES: 'categories',
+  VOUCHERS: 'vouchers',
+  REWARDS_STATUS: 'rewards_status',
 };
 
 // Cache TTL configurations (in milliseconds)
@@ -179,4 +183,8 @@ export const CACHE_TTL = {
   MENU_ITEMS: 5 * 60 * 1000, // 5 minutes
   MENU_ITEM: 10 * 60 * 1000, // 10 minutes
   ORDER: 2 * 60 * 1000, // 2 minutes
+  FEATURED_ITEMS: 30 * 60 * 1000, // 30 minutes (as per requirements)
+  CATEGORIES: 60 * 60 * 1000, // 1 hour (as per requirements)
+  VOUCHERS: 0, // No caching for vouchers (always fresh)
+  REWARDS_STATUS: 5 * 60 * 1000, // 5 minutes
 };

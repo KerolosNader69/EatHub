@@ -9,11 +9,46 @@
   margin: 0 auto;
 }
 
+/* Cart header with back button */
+.cart-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.back-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background-color: #FFFFFF;
+  color: #000000;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(196, 30, 58, 0.2);
+}
+
+.back-button:hover {
+  background-color: #F5F5F5;
+  transform: translateX(-2px);
+}
+
+.back-button:active {
+  transform: scale(0.95);
+}
+
 .cart-title {
   font-size: 32px;
   font-weight: 700;
   color: #000000;
-  margin-bottom: 32px;
+  margin: 0;
 }
 
 /* Empty cart state */
@@ -215,6 +250,58 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.payment-summary-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.summary-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #666666;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.summary-divider {
+  height: 2px;
+  background-color: #F5F5F5;
+  margin: 16px 0;
+}
+
+.total-row {
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.total-row .summary-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.total-row .summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #C41E3A;
+}
+
+/* Legacy styles for backward compatibility */
 .cart-total {
   display: flex;
   justify-content: space-between;
@@ -267,9 +354,43 @@
     padding: 24px 16px;
   }
 
-  .cart-title {
-    font-size: 28px;
+  .cart-header {
     margin-bottom: 24px;
+    gap: 12px;
+  }
+
+  .back-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cart-title {
+    font-size: 24px;
+  }
+
+  .payment-summary-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .summary-row {
+    margin-bottom: 10px;
+  }
+
+  .summary-label {
+    font-size: 14px;
+  }
+
+  .summary-value {
+    font-size: 14px;
+  }
+
+  .total-row .summary-label {
+    font-size: 16px;
+  }
+
+  .total-row .summary-value {
+    font-size: 20px;
   }
 
   .cart-item {

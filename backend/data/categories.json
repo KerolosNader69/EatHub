@@ -1,0 +1,48 @@
+[
+  {
+    "id": "1",
+    "name": "beef-burgers",
+    "display_name": "Beef burgers",
+    "icon": "🍔",
+    "image_url": "/icons/categories/beefburgers.jpeg",
+    "background_color": "#FFE5E5",
+    "is_active": true,
+    "sort_order": 1
+  },
+  {
+    "id": "2",
+    "name": "box-deals",
+    "display_name": "Box Deals",
+    "icon": "📦",
+    "background_color": "#FFF4E5",
+    "is_active": true,
+    "sort_order": 2
+  },
+  {
+    "id": "3",
+    "name": "chicken-burgers",
+    "display_name": "Chicken burgers",
+    "icon": "🍗",
+    "background_color": "#FFF8E5",
+    "is_active": true,
+    "sort_order": 3
+  },
+  {
+    "id": "4",
+    "name": "drinks",
+    "display_name": "Drinks",
+    "icon": "🥤",
+    "background_color": "#E5F5FF",
+    "is_active": true,
+    "sort_order": 4
+  },
+  {
+    "id": "5",
+    "name": "potatoes",
+    "display_name": "Potatoes",
+    "icon": "🍟",
+    "background_color": "#FFF5E5",
+    "is_active": true,
+    "sort_order": 5
+  }
+]

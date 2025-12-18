@@ -8,10 +8,13 @@
   --color-gray-dark: #333333;
   --color-gray-border: #CCCCCC;
   --color-error: #FF0000;
+  --color-green: #28A745;
+  --color-red-dark: #A01729;
 
   /* Typography */
   --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-weight-regular: 400;
+  --font-weight-medium: 500;
   --font-weight-bold: 700;
   --font-weight-extra-bold: 800;
 
@@ -19,6 +22,9 @@
   --font-size-h1: 40px;
   --font-size-h2: 32px;
   --font-size-h3: 24px;
+  --font-size-xl: 28px;
+  --font-size-lg: 18px;
+  --font-size-base: 16px;
   --font-size-body: 16px;
   --font-size-small: 14px;
   --font-size-caption: 13px;

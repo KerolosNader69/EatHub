@@ -22,7 +22,7 @@ const menuItemSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Category is required'],
       enum: {
-        values: ['appetizers', 'main_courses', 'desserts', 'beverages'],
+        values: ['chicken_burgers', 'beef_burgers', 'box_deals', 'drinks', 'potatoes', 'deals_night'],
         message: '{VALUE} is not a valid category'
       }
     },

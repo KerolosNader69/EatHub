@@ -2,6 +2,78 @@ const supabase = require('../config/supabase');
 const supabaseAdmin = require('../config/supabase').supabaseAdmin || supabase;
 
 /**
+ * Award points to user after order completion
+ * 1 point per 10 EGP spent
+ */
+const awardPointsForOrder = async (userId, totalAmount, orderNumber) => {
+  if (!userId) return null;
+  
+  try {
+    const pointsToAward = Math.floor(totalAmount / 10); // 1 point per 10 EGP
+    
+    if (pointsToAward <= 0) return null;
+    
+    // Get or create user rewards record
+    let { data: userRewards, error: fetchError } = await supabaseAdmin
+      .from('user_rewards')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (fetchError && fetchError.code === 'PGRST116') {
+      // User doesn't have rewards record, create one
+      const { data: newRewards, error: createError } = await supabaseAdmin
+        .from('user_rewards')
+        .insert([{
+          user_id: userId,
+          current_points: pointsToAward,
+          total_earned: pointsToAward
+        }])
+        .select()
+        .single();
+      
+      if (createError) throw createError;
+      userRewards = newRewards;
+    } else if (fetchError) {
+      throw fetchError;
+    } else {
+      // Update existing rewards
+      const { data: updatedRewards, error: updateError } = await supabaseAdmin
+        .from('user_rewards')
+        .update({
+          current_points: userRewards.current_points + pointsToAward,
+          total_earned: userRewards.total_earned + pointsToAward,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .select()
+        .single();
+      
+      if (updateError) throw updateError;
+      userRewards = updatedRewards;
+    }
+    
+    // Create transaction record
+    await supabaseAdmin
+      .from('reward_transactions')
+      .insert([{
+        user_id: userId,
+        points_used: pointsToAward,
+        transaction_type: 'earn',
+        description: `Earned from order #${orderNumber}`
+      }]);
+    
+    return {
+      pointsAwarded: pointsToAward,
+      newBalance: userRewards.current_points
+    };
+  } catch (error) {
+    console.error('Error awarding points:', error);
+    return null;
+  }
+};
+
+/**
  * Generate unique order number
  * Format: "EH" + timestamp + random 4-digit number
  */
@@ -19,6 +91,7 @@ const generateOrderNumber = () => {
 const createOrder = async (req, res) => {
   try {
     const { items, customerInfo, specialInstructions } = req.body;
+    const userId = req.headers['x-user-id'] || null; // Get user ID from header if logged in
 
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -141,6 +214,12 @@ const createOrder = async (req, res) => {
 
     if (itemsError) throw itemsError;
 
+    // Award points to user if logged in
+    let pointsResult = null;
+    if (userId) {
+      pointsResult = await awardPointsForOrder(userId, totalAmount, order.order_number);
+    }
+
     res.status(201).json({
       success: true,
       data: {
@@ -149,7 +228,11 @@ const createOrder = async (req, res) => {
         order: {
           ...order,
           items: orderItems
-        }
+        },
+        rewards: pointsResult ? {
+          pointsEarned: pointsResult.pointsAwarded,
+          newBalance: pointsResult.newBalance
+        } : null
       }
     });
   } catch (error) {

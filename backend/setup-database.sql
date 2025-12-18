@@ -70,3 +70,26 @@ CREATE POLICY "Allow public read access to order items" ON order_items
 
 CREATE POLICY "Allow authenticated users full access to order items" ON order_items
   FOR ALL USING (auth.role() = 'authenticated');
+
+
+-- Feedback Table
+CREATE TABLE IF NOT EXISTS feedback (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT DEFAULT 'Anonymous',
+  email TEXT,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  category TEXT NOT NULL DEFAULT 'general',
+  message TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+
+-- Allow public to create feedback
+CREATE POLICY "Allow public to create feedback" ON feedback
+  FOR INSERT WITH CHECK (true);
+
+-- Allow authenticated users to read feedback
+CREATE POLICY "Allow authenticated users to read feedback" ON feedback
+  FOR SELECT USING (auth.role() = 'authenticated');

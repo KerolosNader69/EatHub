@@ -140,6 +140,66 @@ export const deleteMenuItem = async (id) => {
   }
 };
 
+/**
+ * Get all vouchers (admin only)
+ * @returns {Promise<Array>} Array of vouchers
+ */
+export const getAllVouchers = async () => {
+  try {
+    const response = await api.get('/vouchers');
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error('Error fetching vouchers:', error);
+    throw error;
+  }
+};
+
+/**
+ * Create a new voucher (admin only)
+ * @param {Object} voucherData - Voucher data
+ * @returns {Promise<Object>} Created voucher
+ */
+export const createVoucher = async (voucherData) => {
+  try {
+    const response = await api.post('/vouchers', voucherData);
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error('Error creating voucher:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update a voucher (admin only)
+ * @param {string} id - Voucher ID
+ * @param {Object} voucherData - Updated voucher data
+ * @returns {Promise<Object>} Updated voucher
+ */
+export const updateVoucher = async (id, voucherData) => {
+  try {
+    const response = await api.put(`/vouchers/${id}`, voucherData);
+    return response.data.data || response.data;
+  } catch (error) {
+    console.error(`Error updating voucher ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a voucher (admin only)
+ * @param {string} id - Voucher ID
+ * @returns {Promise<Object>} Deletion confirmation
+ */
+export const deleteVoucher = async (id) => {
+  try {
+    const response = await api.delete(`/vouchers/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting voucher ${id}:`, error);
+    throw error;
+  }
+};
+
 const adminService = {
   login,
   verifyToken,
@@ -147,7 +207,11 @@ const adminService = {
   updateOrderStatus,
   createMenuItem,
   updateMenuItem,
-  deleteMenuItem
+  deleteMenuItem,
+  getAllVouchers,
+  createVoucher,
+  updateVoucher,
+  deleteVoucher
 };
 
 export default adminService;

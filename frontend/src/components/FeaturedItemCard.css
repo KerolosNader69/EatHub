@@ -1,0 +1,311 @@
+/* Featured Item Card */
+.featured-item-card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(196, 30, 58, 0.1);
+}
+
+.featured-item-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: scale(1.02);
+}
+
+.featured-item-card:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Image Container */
+.featured-item-image-container {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background-color: var(--color-gray-light);
+}
+
+.featured-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
+}
+
+.featured-item-card:hover .featured-item-image {
+  transform: scale(1.05);
+}
+
+.featured-item-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-light);
+  color: var(--color-gray-medium);
+}
+
+.featured-item-placeholder-icon {
+  opacity: 0.5;
+}
+
+/* Unavailable Overlay */
+.featured-item-unavailable-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+}
+
+/* Content */
+.featured-item-content {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--spacing-xs);
+}
+
+.featured-item-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-black);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.featured-item-price {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-red);
+  margin: 0;
+}
+
+/* Add to Cart Button */
+.featured-item-add-button {
+  background-color: var(--color-red);
+  color: var(--color-white);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: auto;
+  min-height: 36px;
+}
+
+.featured-item-add-button:hover:not(.disabled) {
+  background-color: var(--color-red-dark);
+  transform: translateY(-1px);
+}
+
+.featured-item-add-button:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.featured-item-add-button.disabled {
+  background-color: var(--color-gray-medium);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.featured-item-add-button.adding {
+  background-color: var(--color-green);
+  animation: addSuccess 0.3s ease-out;
+}
+
+@keyframes addSuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Button Icons */
+.featured-item-cart-icon,
+.featured-item-success-icon {
+  flex-shrink: 0;
+}
+
+.featured-item-success-icon {
+  animation: checkmark 0.3s ease-out;
+}
+
+@keyframes checkmark {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .featured-item-card {
+    min-width: 280px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  .featured-item-image-container {
+    height: 140px;
+  }
+
+  .featured-item-content {
+    padding: var(--spacing-sm);
+  }
+
+  .featured-item-name {
+    font-size: var(--font-size-small);
+  }
+
+  .featured-item-price {
+    font-size: var(--font-size-base);
+  }
+
+  .featured-item-add-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 12px;
+    min-height: 32px;
+  }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 480px) {
+  .featured-item-card {
+    min-width: 260px;
+  }
+
+  .featured-item-image-container {
+    height: 120px;
+  }
+}
+
+/* Focus styles for accessibility */
+.featured-item-card:focus {
+  outline: 3px solid var(--color-red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-white), 0 0 0 4px var(--color-red);
+}
+
+.featured-item-card:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.featured-item-card:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-white), 0 0 0 4px var(--color-red);
+}
+
+.featured-item-add-button:focus {
+  outline: 3px solid var(--color-white);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-red), 0 0 0 4px var(--color-white);
+}
+
+.featured-item-add-button:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+.featured-item-add-button:focus-visible {
+  outline: 3px solid var(--color-white);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-red), 0 0 0 4px var(--color-white);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .featured-item-card {
+    border: 1px solid var(--color-gray-dark);
+  }
+  
+  .featured-item-unavailable-overlay {
+    background-color: rgba(0, 0, 0, 0.9);
+    border: 1px solid var(--color-white);
+  }
+  
+  .featured-item-add-button.disabled {
+    border: 1px solid var(--color-gray-dark);
+  }
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .featured-item-card,
+  .featured-item-image,
+  .featured-item-add-button {
+    transition: none;
+  }
+  
+  .featured-item-card:hover {
+    transform: none;
+  }
+  
+  .featured-item-card:hover .featured-item-image {
+    transform: none;
+  }
+  
+  .featured-item-add-button:hover:not(.disabled) {
+    transform: none;
+  }
+  
+  .featured-item-add-button.adding {
+    animation: none;
+  }
+  
+  .featured-item-success-icon {
+    animation: none;
+  }
+}

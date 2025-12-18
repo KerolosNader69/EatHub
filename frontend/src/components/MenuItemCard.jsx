@@ -62,7 +62,7 @@ const MenuItemCard = ({ item, onAddToCart, onClick }) => {
 
       <div className="menu-item-content">
         <h3 className="menu-item-name">{item.name}</h3>
-        <p className="menu-item-price">${item.price.toFixed(2)}</p>
+        <p className="menu-item-price">{item.price.toFixed(2)} EGP</p>
         <p className="menu-item-description">
           {truncateDescription(item.description)}
         </p>

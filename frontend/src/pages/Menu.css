@@ -41,6 +41,47 @@
   transform: scale(0.98);
 }
 
+/* Category Header with Back Button */
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: var(--spacing-xl);
+}
+
+.back-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background-color: var(--color-white);
+  color: var(--color-black);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(196, 30, 58, 0.2);
+}
+
+.back-button:hover {
+  background-color: #F5F5F5;
+  transform: translateX(-2px);
+}
+
+.back-button:active {
+  transform: scale(0.95);
+}
+
+.category-header .menu-title {
+  text-align: left;
+  margin: 0;
+  flex: 1;
+}
+
 .menu-title {
   text-align: center;
   margin-bottom: var(--spacing-xl);
@@ -88,30 +129,43 @@
   border-color: var(--color-red);
 }
 
-/* Menu Grid */
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-lg);
+/* Menu List - Vertical Layout */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background-color: var(--color-white);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .no-items {
   text-align: center;
   padding: var(--spacing-xxl);
   color: var(--color-gray-medium);
+  background-color: var(--color-white);
+  border-radius: 12px;
 }
 
-/* Tablet Layout (2 columns) */
-@media (max-width: 1024px) {
-  .menu-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Mobile Layout (1 column) */
+/* Mobile Layout */
 @media (max-width: 768px) {
   .menu-page {
     padding: var(--spacing-lg) 0;
+  }
+
+  .category-header {
+    margin-bottom: var(--spacing-lg);
+    gap: 12px;
+  }
+
+  .back-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .category-header .menu-title {
+    font-size: 24px;
   }
 
   .menu-title {
@@ -134,8 +188,7 @@
     scroll-snap-align: start;
   }
 
-  .menu-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
+  .menu-list {
+    border-radius: 8px;
   }
 }

@@ -1,0 +1,246 @@
+.rewards-button {
+  /* Base button styling */
+  font-family: var(--font-family);
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  padding: 14px 30px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  
+  /* Secondary button styling with outline */
+  background-color: transparent;
+  color: var(--color-red);
+  border: 2px solid var(--color-red);
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  height: 60px;
+  
+  /* Touch-friendly sizing */
+  min-height: 44px;
+  
+  /* Subtle shadow */
+  box-shadow: 0 2px 4px rgba(196, 30, 58, 0.1);
+}
+
+.rewards-button__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+}
+
+.rewards-button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.rewards-button__text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.rewards-button__text {
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.rewards-button__points {
+  font-size: 12px;
+  font-weight: var(--font-weight-regular);
+  opacity: 0.8;
+  line-height: 1;
+}
+
+/* Hover effects with gradient background */
+.rewards-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, transparent, rgba(196, 30, 58, 0.1));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(196, 30, 58, 0.2);
+  border-color: var(--color-red);
+}
+
+/* Active/pressed state */
+.rewards-button--pressed {
+  transform: translateY(0) scale(0.98);
+  background: rgba(196, 30, 58, 0.05);
+}
+
+/* Disabled state */
+.rewards-button--disabled {
+  border-color: var(--color-gray-border);
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.rewards-button--disabled:hover {
+  background-color: transparent;
+  transform: none;
+  box-shadow: none;
+  border-color: var(--color-gray-border);
+}
+
+/* Focus state for accessibility */
+.rewards-button:focus {
+  outline: 3px solid var(--color-red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-white), 0 0 0 4px var(--color-red);
+}
+
+.rewards-button:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: 0 2px 4px rgba(196, 30, 58, 0.1);
+}
+
+.rewards-button:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-white), 0 0 0 4px var(--color-red);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .rewards-button {
+    width: 100%;
+    min-width: unset;
+    padding: 16px 24px;
+    font-size: 16px;
+    /* Ensure minimum touch target */
+    min-height: 48px;
+  }
+  
+  .rewards-button__text-container {
+    align-items: center;
+  }
+}
+
+/* Small Mobile Styles (< 480px) */
+@media (max-width: 480px) {
+  .rewards-button {
+    padding: 14px 20px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+  
+  .rewards-button__icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Extra Small Mobile Styles (< 360px) */
+@media (max-width: 360px) {
+  .rewards-button {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .rewards-button {
+    border-width: 3px;
+  }
+  
+  .rewards-button:hover:not(:disabled) {
+    background-color: var(--color-red);
+    color: var(--color-white);
+  }
+}
+
+/* Success animation state */
+.rewards-button--success {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: var(--color-white);
+  animation: rewardsSuccessPulse 0.6s ease-out;
+}
+
+.rewards-button--success:hover {
+  background-color: #28a745;
+  border-color: #28a745;
+  transform: none;
+}
+
+.rewards-button__success-icon {
+  animation: checkmarkDraw 0.6s ease-out;
+}
+
+@keyframes rewardsSuccessPulse {
+  0% {
+    background-color: transparent;
+    border-color: var(--color-red);
+    color: var(--color-red);
+    transform: scale(1);
+  }
+  50% {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: var(--color-white);
+    transform: scale(1.05);
+  }
+  100% {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: var(--color-white);
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmarkDraw {
+  0% {
+    stroke-dasharray: 0 100;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dasharray: 100 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .rewards-button {
+    transition: none;
+  }
+  
+  .rewards-button:hover:not(:disabled) {
+    transform: none;
+  }
+  
+  .rewards-button--pressed {
+    transform: none;
+  }
+  
+  .rewards-button--success {
+    animation: none;
+  }
+  
+  .rewards-button__success-icon {
+    animation: none;
+  }
+}
+
+/* Dark mode support (if implemented in the future) */
+@media (prefers-color-scheme: dark) {
+  .rewards-button {
+    box-shadow: 0 2px 4px rgba(196, 30, 58, 0.3);
+  }
+  
+  .rewards-button:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(196, 30, 58, 0.4);
+  }
+}

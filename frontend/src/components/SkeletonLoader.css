@@ -105,6 +105,78 @@
   }
 }
 
+/* Category Card Skeleton */
+.category-card-skeleton {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.skeleton-category-icon {
+  border-radius: 12px;
+}
+
+.skeleton-category-name {
+  margin: 0;
+}
+
+/* Featured Item Skeleton */
+.featured-item-skeleton {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-featured-image {
+  width: 100%;
+  border-radius: 0;
+}
+
+.skeleton-featured-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-featured-name {
+  margin-bottom: 4px;
+}
+
+.skeleton-featured-price {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.skeleton-featured-button {
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* Featured Items Grid Skeleton */
+.featured-items-grid-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+/* Dark theme support for new skeletons */
+@media (prefers-color-scheme: dark) {
+  .category-card-skeleton,
+  .featured-item-skeleton {
+    background-color: #1a1a1a;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .skeleton-content {
@@ -113,5 +185,82 @@
 
   .order-card-skeleton {
     padding: 12px;
+  }
+
+  .featured-items-grid-skeleton {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .category-card-skeleton {
+    width: 85px;
+    padding: 8px;
+  }
+
+  .skeleton-category-icon {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .skeleton-category-name {
+    width: 65px !important;
+    height: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-card-skeleton {
+    width: 80px;
+  }
+
+  .skeleton-category-icon {
+    width: 52px !important;
+    height: 52px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .category-card-skeleton {
+    width: 75px;
+    padding: 6px;
+  }
+
+  .skeleton-category-icon {
+    width: 48px !important;
+    height: 48px !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .category-card-skeleton {
+    width: 140px;
+    padding: 16px;
+  }
+
+  .skeleton-category-icon {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .skeleton-category-name {
+    width: 100px !important;
+    height: 14px !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .category-card-skeleton {
+    width: 160px;
+    padding: 18px;
+  }
+
+  .skeleton-category-icon {
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  .skeleton-category-name {
+    width: 120px !important;
+    height: 15px !important;
   }
 }

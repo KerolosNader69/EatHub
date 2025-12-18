@@ -1,0 +1,466 @@
+.admin-voucher-management {
+  width: 100%;
+}
+
+.voucher-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.voucher-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0;
+}
+
+.btn-add-new {
+  background-color: #C41E3A;
+  color: #FFFFFF;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(196, 30, 58, 0.2);
+}
+
+.btn-add-new:hover {
+  background-color: #A01830;
+}
+
+.btn-add-new:active {
+  transform: scale(0.98);
+}
+
+.loading-state {
+  text-align: center;
+  padding: 48px;
+  color: #666666;
+  font-size: 16px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: #666666;
+  font-size: 16px;
+}
+
+.vouchers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.voucher-card {
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.voucher-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.voucher-card.inactive {
+  opacity: 0.7;
+  background-color: #F5F5F5;
+}
+
+.voucher-card.expired {
+  border-color: #FF6B6B;
+}
+
+.voucher-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #F0F0F0;
+}
+
+.voucher-code {
+  font-size: 20px;
+  font-weight: 700;
+  color: #C41E3A;
+  letter-spacing: 1px;
+}
+
+.voucher-status {
+  display: flex;
+  gap: 8px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active-badge {
+  background-color: #4CAF50;
+  color: #FFFFFF;
+}
+
+.status-badge.inactive-badge {
+  background-color: #9E9E9E;
+  color: #FFFFFF;
+}
+
+.status-badge.expired-badge {
+  background-color: #FF6B6B;
+  color: #FFFFFF;
+}
+
+.voucher-card-body {
+  flex: 1;
+  margin-bottom: 16px;
+}
+
+.voucher-card-body h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 0 8px 0;
+}
+
+.voucher-description {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.voucher-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #666666;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.discount-value {
+  color: #C41E3A;
+  font-size: 16px;
+}
+
+.voucher-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #F0F0F0;
+}
+
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 40px;
+}
+
+.btn-edit {
+  background-color: #2196F3;
+  color: #FFFFFF;
+}
+
+.btn-edit:hover {
+  background-color: #1976D2;
+}
+
+.btn-delete {
+  background-color: #F44336;
+  color: #FFFFFF;
+}
+
+.btn-delete:hover {
+  background-color: #D32F2F;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.voucher-form-modal {
+  background: #FFFFFF;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #666666;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #F0F0F0;
+}
+
+.voucher-form {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #C41E3A;
+}
+
+.form-group input:disabled {
+  background-color: #F5F5F5;
+  color: #999999;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.checkbox-group {
+  margin-top: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #E0E0E0;
+}
+
+.btn-cancel,
+.btn-submit {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+}
+
+.btn-cancel {
+  background-color: #E0E0E0;
+  color: #333333;
+}
+
+.btn-cancel:hover {
+  background-color: #D0D0D0;
+}
+
+.btn-submit {
+  background-color: #C41E3A;
+  color: #FFFFFF;
+}
+
+.btn-submit:hover {
+  background-color: #A01830;
+}
+
+.delete-confirm-modal {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.delete-confirm-modal h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0 0 16px 0;
+}
+
+.delete-confirm-modal p {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.warning-text {
+  color: #F44336 !important;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.btn-confirm-delete {
+  padding: 10px 20px;
+  background-color: #F44336;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-confirm-delete:hover {
+  background-color: #D32F2F;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .vouchers-list {
+    grid-template-columns: 1fr;
+  }
+
+  .voucher-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .btn-add-new {
+    width: 100%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+  }
+}

@@ -1,8 +1,7 @@
-const { verifyToken } = require('../utils/jwt');
-const Admin = require('../models/Admin');
+const supabase = require('../config/supabase');
 
 /**
- * Middleware to verify JWT token and authenticate admin users
+ * Middleware to verify Supabase JWT token and authenticate admin users
  * Expects token in Authorization header as "Bearer <token>"
  */
 const authenticateAdmin = async (req, res, next) => {
@@ -23,46 +22,29 @@ const authenticateAdmin = async (req, res, next) => {
     // Extract token
     const token = authHeader.split(' ')[1];
 
-    // Verify token
-    const decoded = verifyToken(token);
+    // Verify token with Supabase
+    const { data, error } = await supabase.auth.getUser(token);
 
-    // Find admin user
-    const admin = await Admin.findById(decoded.id).select('-password');
-
-    if (!admin) {
+    if (error || !data.user) {
       return res.status(401).json({
         success: false,
         error: {
-          message: 'Admin user not found',
+          message: 'Invalid or expired token',
           code: 'INVALID_TOKEN'
         }
       });
     }
 
-    // Attach admin to request object
-    req.admin = admin;
+    // Attach admin user to request object
+    req.admin = {
+      id: data.user.id,
+      email: data.user.email,
+      username: data.user.user_metadata?.username || data.user.email.split('@')[0]
+    };
+    
     next();
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        success: false,
-        error: {
-          message: 'Invalid token',
-          code: 'INVALID_TOKEN'
-        }
-      });
-    }
-
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        error: {
-          message: 'Token expired',
-          code: 'TOKEN_EXPIRED'
-        }
-      });
-    }
-
+    console.error('Authentication error:', error);
     return res.status(500).json({
       success: false,
       error: {
