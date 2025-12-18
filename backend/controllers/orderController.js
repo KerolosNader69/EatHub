@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const supabaseAdmin = require('../config/supabase').supabaseAdmin || supabase;
 
 /**
  * Generate unique order number
@@ -67,7 +68,7 @@ const createOrder = async (req, res) => {
         });
       }
 
-      // Fetch menu item from Supabase
+      // Fetch menu item from Supabase (use regular client for read)
       const { data: menuItem, error } = await supabase
         .from('menu_items')
         .select('*')
@@ -110,8 +111,8 @@ const createOrder = async (req, res) => {
     // Set estimated delivery time (current time + 45 minutes)
     const estimatedDelivery = new Date(Date.now() + 45 * 60 * 1000).toISOString();
 
-    // Create order in Supabase
-    const { data: order, error: orderError } = await supabase
+    // Create order in Supabase (use admin client to bypass RLS)
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert([{
         order_number: orderNumber,
@@ -128,13 +129,13 @@ const createOrder = async (req, res) => {
 
     if (orderError) throw orderError;
 
-    // Insert order items
+    // Insert order items (use admin client to bypass RLS)
     const itemsToInsert = orderItems.map(item => ({
       ...item,
       order_id: order.id
     }));
 
-    const { error: itemsError } = await supabase
+    const { error: itemsError } = await supabaseAdmin
       .from('order_items')
       .insert(itemsToInsert);
 
