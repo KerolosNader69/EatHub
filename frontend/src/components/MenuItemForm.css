@@ -139,15 +139,26 @@
 .checkbox-group label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   cursor: pointer;
   font-weight: 400;
+  padding: 8px 0;
 }
 
 .checkbox-group input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
+  accent-color: #C41E3A;
+  border: 2px solid #C41E3A;
+  border-radius: 4px;
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  -moz-appearance: checkbox;
+}
+
+.checkbox-group input[type="checkbox"]:checked {
+  background-color: #C41E3A;
 }
 
 .image-preview {
