@@ -116,9 +116,22 @@ export const formatFileSize = (bytes) => {
 };
 
 /**
+ * Convert Blob to File with proper name and type
+ * @param {Blob} blob - Blob to convert
+ * @param {string} originalName - Original file name
+ * @returns {File} - File object
+ */
+const blobToFile = (blob, originalName) => {
+  // Get the base name without extension and add .jpg since we compress to JPEG
+  const baseName = originalName.replace(/\.[^/.]+$/, '');
+  const fileName = `${baseName}.jpg`;
+  return new File([blob], fileName, { type: 'image/jpeg' });
+};
+
+/**
  * Process and optimize image file for upload
  * @param {File} file - Original image file
- * @returns {Promise<{file: Blob, size: number, compressed: boolean}>}
+ * @returns {Promise<{file: File, size: number, compressed: boolean}>}
  */
 export const processImageForUpload = async (file) => {
   // Validate format
@@ -142,7 +155,7 @@ export const processImageForUpload = async (file) => {
     // Check if compression was successful
     if (compressedBlob.size <= MAX_IMAGE_SIZE) {
       return {
-        file: compressedBlob,
+        file: blobToFile(compressedBlob, file.name),
         size: compressedBlob.size,
         compressed: true,
       };
@@ -153,7 +166,7 @@ export const processImageForUpload = async (file) => {
     
     if (moreCompressedBlob.size <= MAX_IMAGE_SIZE) {
       return {
-        file: moreCompressedBlob,
+        file: blobToFile(moreCompressedBlob, file.name),
         size: moreCompressedBlob.size,
         compressed: true,
       };
